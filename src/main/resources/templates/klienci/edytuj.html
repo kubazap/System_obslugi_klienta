@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Klienci</title>
+
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+          rel="stylesheet">
+
+    <!-- CSS -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/vendor/datatables/dataTables.bootstrap4.min.css}" rel="stylesheet">
+</head>
+
+<body id="page-top">
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <!-- Sidebar - Logo -->
+        <a class="d-flex align-items-center justify-content-center" th:href="@{/index}">
+            <img class="img-logo" th:src="@{/img/system-call-center.png}" alt="Logo">
+        </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+
+        <!-- Nav Item - Wizyty -->
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/wizyty}">
+                <i class="fas fa-fw fa-calendar-week"></i>
+                <span class="ml-1">Wizyty</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Klienci (aktywne) -->
+        <li class="nav-item active">
+            <a class="nav-link" th:href="@{/klienci}">
+                <i class="fas fa-fw fa-users"></i>
+                <span class="ml-1">Klienci</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Dokumenty -->
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/dokumenty}">
+                <i class="fas fa-fw fa-file"></i>
+                <span class="ml-1">Dokumenty</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Chat/Wiadomości -->
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/chat}">
+                <i class="fas fa-fw fa-inbox"></i>
+                <span class="ml-1">Wiadomości</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider d-none d-md-block">
+    </ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand navbar-light topbar mb-4 mt-2 static-top">
+
+                <!-- Page Heading -->
+                <h1 class="h2 ml-3 mt-2 font-weight-bold">KLIENCI <span class="title">/</span> EDYTUJ KLIENTA</h1>
+
+                <!-- Topbar Navbar -->
+                <ul class="navbar-nav ml-auto">
+
+                    <!-- Nav Item - Powiadomienia -->
+                    <li class="nav-item dropdown no-arrow mx-1">
+                        <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-bell fa-fw text-gray-700"></i>
+                            <!-- Counter - Powiadomienia -->
+                            <span class="badge badge-danger badge-counter">2+</span>
+                        </a>
+                        <!-- Dropdown - Powiadomienia -->
+                        <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                             aria-labelledby="alertsDropdown">
+                            <h6 class="dropdown-header">
+                                Powiadomienia
+                            </h6>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="mr-3">
+                                    <div class="icon-circle bg-primary">
+                                        <i class="fas fa-file-alt text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="small text-gray-500">Kwiecień 12, 2025</div>
+                                    <span class="font-weight-bold">Nowy raport miesięczny jest gotowy do pobrania. </span>
+                                </div>
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="mr-3">
+                                    <div class="icon-circle bg-success">
+                                        <i class="fas fa-donate text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="small text-gray-500">Kwiecień 1, 2025</div>
+                                    Uzyskane zyski w poprzednim miesiącu: 21 370 zł.
+                                </div>
+                            </a>
+                            <a class="dropdown-item text-center small text-gray-500" href="#">Wszystkie powiadomienia</a>
+                        </div>
+                    </li>
+
+                    <!-- Nav Item - Użytkownik -->
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="ml-1 d-none d-lg-inline text-gray-700 figure-caption">Jakub Zapała</span>
+                            <img class="img-profile rounded-circle" th:src="@{/img/undraw_profile.svg}">
+                        </a>
+                        <!-- Dropdown - Użytkownik -->
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                             aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Wyloguj się
+                            </a>
+                        </div>
+                    </li>
+
+                </ul>
+
+            </nav>
+            <!-- End of Topbar -->
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-sm-flex align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold">Dane klienta</h6>
+                    </div>
+                    <div class="card-body">
+                        <form class="user" method="post" th:object="${klientDto}">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <div class="form-group row">
+                                <div class="col-sm-3 mb-2 mb-sm-0 ml-3 mr-4">
+                                    <label for="imie">Imię<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-user" id="imie" th:field="${klientDto.imie}">
+                                    <p th:if="${#fields.hasErrors('imie')}"
+                                       th:errorclass="text-danger"
+                                       th:errors="${klientDto.imie}"></p>
+                                </div>
+                                <div class="col-sm-3 mr-4">
+                                    <label for="nazwisko">Nazwisko<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-user" id="nazwisko" th:field="${klientDto.nazwisko}">
+                                    <p th:if="${#fields.hasErrors('nazwisko')}"
+                                       th:errorclass="text-danger"
+                                       th:errors="${klientDto.nazwisko}"></p>
+                                </div>
+                                <div class="col-sm-2 mr-4">
+                                    <label for="dataUrodzenia">Data urodzenia<span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control form-control-user" id="dataUrodzenia" th:field="${klientDto.dataUrodzenia}">
+                                    <p th:if="${#fields.hasErrors('dataUrodzenia')}"
+                                       th:errorclass="text-danger"
+                                       th:errors="${klientDto.dataUrodzenia}"></p>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-3 mb-2 mb-sm-0 ml-3 mr-4">
+                                    <label for="ulica">Ulica, numer domu<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-user" id="ulica" th:field="${klientDto.ulicaNumerDomu}">
+                                    <p th:if="${#fields.hasErrors('ulicaNumerDomu')}"
+                                       th:errorclass="text-danger"
+                                       th:errors="${klientDto.ulicaNumerDomu}"></p>
+                                </div>
+                                <div class="col-sm-3 mb-2 mb-sm-0 mr-4">
+                                    <label for="miejscowosc">Miejscowość<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-user" id="miejscowosc" th:field="${klientDto.miejscowosc}">
+                                    <p th:if="${#fields.hasErrors('miejscowosc')}"
+                                       th:errorclass="text-danger"
+                                       th:errors="${klientDto.miejscowosc}"></p>
+                                </div>
+                                <div class="col-sm-2 mb-2 mb-sm-0 mr-4">
+                                    <label for="poleKod">Kod pocztowy<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-user" id="poleKod" required pattern="[0-9]{2}-[0-9]{3}" th:field="${klientDto.kodPocztowy}">
+                                    <p th:if="${#fields.hasErrors('kodPocztowy')}"
+                                       th:errorclass="text-danger"
+                                       th:errors="${klientDto.kodPocztowy}"></p>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-3 mb-2 mb-sm-0 ml-3 mr-4">
+                                    <label for="email">E-mail</label>
+                                    <input type="email" class="form-control form-control-user" id="email" th:field="${klientDto.email}">
+                                    <p th:if="${#fields.hasErrors('email')}"
+                                       th:errorclass="text-danger"
+                                       th:errors="${klientDto.email}"></p>
+                                </div>
+                                <div class="col-sm-3 mr-4">
+                                    <label for="numerTelefonu">Numer telefonu</label>
+                                    <input type="text" class="form-control form-control-user" id="numerTelefonu" th:field="${klientDto.numerTelefonu}">
+                                    <p th:if="${#fields.hasErrors('numerTelefonu')}"
+                                       th:errorclass="text-danger"
+                                       th:errors="${klientDto.numerTelefonu}"></p>
+                                </div>
+                            </div>
+                            <div class="row mt-5">
+                                <div class="col-sm-9 mb-2 mb-sm-0 ml-3 mr-3">
+                                </div>
+                                <div class="col-sm-1 mb-2 mb-sm-0 mr-3">
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">
+                                        Zapisz
+                                    </button>
+                                </div>
+                                <div class="col-sm-1 mr-4">
+                                    <a th:href="@{/klienci}" class="btn btn-danger btn-user btn-block">
+                                        Anuluj
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- End of Page Content -->
+
+        </div>
+        <!-- End of Main Content -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Logout Modal-->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Chcesz się wylogować?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">Wybierz „Wyloguj” poniżej, jeśli chcesz zakończyć bieżącą sesję.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Anuluj</button>
+                <a class="btn btn-primary" th:href="@{/login}">Wyloguj</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendor/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
+<script th:src="@{/js/demo/datatables-demo.js}"></script>
+
+</body>
+</html>

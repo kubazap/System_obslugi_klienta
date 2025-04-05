@@ -468,7 +468,7 @@ mark,
 }
 
 .figure-caption {
-  font-size: 90%;
+  font-size: 0.95rem;
   margin-right: 0.8rem;
 }
 
@@ -1787,7 +1787,7 @@ pre code {
 .form-control {
   display: block;
   width: 100%;
-  height: calc(1.5em + 0.75rem + 2px);
+  height: calc(1.5em + 0.5rem + 2px);
   padding: 0.375rem 0.75rem;
   font-size: 1rem;
   font-weight: 400;
@@ -1796,7 +1796,7 @@ pre code {
   background-color: #fff;
   background-clip: padding-box;
   border: 1px solid #d1d3e2;
-  border-radius: 0.35rem;
+  border-radius: 0.2rem;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -1940,7 +1940,7 @@ textarea.form-control {
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-text {
@@ -2280,7 +2280,7 @@ textarea.form-control {
   background-color: transparent;
   border: 1px solid transparent;
   padding: 0.375rem 0.75rem;
-  font-size: 1rem;
+  font-size: 0.85rem;
   line-height: 1.5;
   border-radius: 0.35rem;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
@@ -2896,7 +2896,7 @@ fieldset:disabled a.btn {
 
 .btn-sm, .btn-group-sm > .btn {
   padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   line-height: 1.5;
   border-radius: 0.2rem;
 }
@@ -10259,6 +10259,10 @@ a:focus {
   font-size: 1.25rem;
 }
 
+.navbar .title {
+  color: #062A67;
+}
+
 @media (min-width: 576px) {
   .topbar .dropdown {
     position: relative;
@@ -10525,12 +10529,12 @@ a:focus {
     width: 14rem;
   }
   .sidebar .nav-item .nav-link i {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     color: #808080;
     margin-right: 0.25rem;
   }
   .sidebar .nav-item .nav-link span {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     color: #808080;
     display: inline;
   }
@@ -10694,11 +10698,11 @@ a:focus {
 }
 
 .sidebar-dark .nav-item.active .nav-link:active i, .sidebar-dark .nav-item.active .nav-link:focus i, .sidebar-dark .nav-item.active .nav-link:hover i {
-  color: #000;
+  color: #2e59d9;
 }
 
 .sidebar-dark .nav-item.active .nav-link:active span, .sidebar-dark .nav-item.active .nav-link:focus span, .sidebar-dark .nav-item.active .nav-link:hover span {
-  color: #000;
+  color: #2e59d9;
 }
 
 .sidebar-dark .nav-item .nav-link[data-toggle="collapse"]::after {
@@ -10882,14 +10886,12 @@ form.user .custom-checkbox.small label {
 
 form.user .form-control-user {
   font-size: 0.8rem;
-  border-radius: 10rem;
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 1rem;
 }
 
 form.user .btn-user {
   font-size: 0.8rem;
-  border-radius: 10rem;
-  padding: 0.75rem 1rem;
+  padding: 0.375rem 0.75rem;
 }
 
 .btn-google {

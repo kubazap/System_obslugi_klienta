@@ -1,30 +1,27 @@
 package pl.zapala.system_obslugi_klienta.models;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 import java.sql.Date;
 
-@Entity
-@Table(name="klienci")
-public class Klient {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class KlientDto {
+    @NotEmpty(message= "Pole imię jest wymagane.")
     private String imie;
+    @NotEmpty(message= "Pole nazwisko jest wymagane.")
     private String nazwisko;
+    @Past
+    @NotNull(message= "Pole daty urodzin jest wymagane.")
     private Date dataUrodzenia;
+    @NotEmpty(message= "Pole ulicy i numeru domu jest wymagane.")
     private String ulicaNumerDomu;
-    private String Miejscowosc;
+    @NotEmpty(message= "Pole miejscowości jest wymagane.")
+    private String miejscowosc;
+    @NotEmpty(message= "Pole kodu pocztowego jest wymagane. Poprawny format kodu: XX-XXX.")
     private String kodPocztowy;
     private String numerTelefonu;
+    @Email
     private String email;
 
-    public Integer getId() {
-        return id;
-    }
-    public void setId(Integer id) {
-        this.id = id;
-    }
     public String getImie() {
         return imie;
     }
@@ -50,10 +47,10 @@ public class Klient {
         this.ulicaNumerDomu = ulicaNumerDomu;
     }
     public String getMiejscowosc() {
-        return Miejscowosc;
+        return miejscowosc;
     }
     public void setMiejscowosc(String miejscowosc) {
-        Miejscowosc = miejscowosc;
+        this.miejscowosc = miejscowosc;
     }
     public String getKodPocztowy() {
         return kodPocztowy;
@@ -74,5 +71,3 @@ public class Klient {
         this.email = email;
     }
 }
-
-
