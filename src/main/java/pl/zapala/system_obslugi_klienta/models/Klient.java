@@ -3,6 +3,7 @@ package pl.zapala.system_obslugi_klienta.models;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Table(name="klienci")
@@ -18,6 +19,15 @@ public class Klient {
     private String kodPocztowy;
     private String numerTelefonu;
     private String email;
+    @OneToMany(mappedBy = "klient", cascade = CascadeType.ALL)
+    private List<Wizyta> wizyty;
+
+    public List<Wizyta> getWizyty() {
+        return wizyty;
+    }
+    public void setWizyty(List<Wizyta> wizyty) {
+        this.wizyty = wizyty;
+    }
 
     public Integer getId() {
         return id;
