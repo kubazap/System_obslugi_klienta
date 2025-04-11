@@ -7,12 +7,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Wizyty</title>
+    <title>Dokumenty</title>
 
     <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
           rel="stylesheet">
-    <link th:href="@{/vendor/select2/select2.min.css}" rel="stylesheet" type="text/css">
 
     <!-- CSS -->
     <link th:href="@{/css/style.css}" rel="stylesheet">
@@ -35,14 +34,14 @@
         <hr class="sidebar-divider my-0">
 
         <!-- Nav Item - Wizyty -->
-        <li class="nav-item active">
+        <li class="nav-item">
             <a class="nav-link" th:href="@{/wizyty}">
                 <i class="fas fa-fw fa-calendar-week"></i>
                 <span class="ml-1">Wizyty</span>
             </a>
         </li>
 
-        <!-- Nav Item - Klienci (aktywne) -->
+        <!-- Nav Item - Klienci -->
         <li class="nav-item">
             <a class="nav-link" th:href="@{/klienci}">
                 <i class="fas fa-fw fa-users"></i>
@@ -50,8 +49,8 @@
             </a>
         </li>
 
-        <!-- Nav Item - Dokumenty -->
-        <li class="nav-item">
+        <!-- Nav Item - Dokumenty (aktywne) -->
+        <li class="nav-item active">
             <a class="nav-link" th:href="@{/dokumenty}">
                 <i class="fas fa-fw fa-file"></i>
                 <span class="ml-1">Dokumenty</span>
@@ -81,7 +80,7 @@
             <nav class="navbar navbar-expand navbar-light topbar mb-4 mt-2 static-top">
 
                 <!-- Page Heading -->
-                <h1 class="h2 ml-3 mt-2 font-weight-bold">WIZYTY <span class="title">/</span> EDYTUJ WIZYTĘ</h1>
+                <h1 class="h2 ml-3 mt-2 font-weight-bold">DOKUMENTY <span class="title">/</span> NOWY DOKUMENT</h1>
 
                 <!-- Topbar Navbar -->
                 <ul class="navbar-nav ml-auto">
@@ -152,111 +151,141 @@
             <div class="container-fluid">
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-sm-flex align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold">Dane wizyty</h6>
+                        <h6 class="m-0 font-weight-bold">Dane dokumentu</h6>
                     </div>
+
                     <div class="card-body">
-                        <form class="user" method="post" th:object="${wizytaDto}">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <div class="form-group row">
-                                <div class="col-sm-3 mb-2 mb-sm-0 ml-3 mr-4">
-                                    <label for="klientId">Imię i nazwisko<span class="text-danger">*</span></label>
-                                    <select class="form-control form-control-user form-select js-select2"
-                                            id="klientId"
-                                            th:field="${wizytaDto.klientId}" disabled>
-                                        <option value="">-- Wybierz klienta --</option>
-                                        <option th:each="klient : ${klienci}"
-                                                th:value="${klient.id}"
-                                                th:text="${klient.imie} + ' ' + ${klient.nazwisko} + ' (ur. ' + ${klient.dataUrodzenia} + ')'">
-                                        </option>
-                                    </select>
-                                    <input type="hidden"
-                                           th:field="${wizytaDto.klientId}" />
-                                    <p th:if="${#fields.hasErrors('klientId')}"
-                                       th:errorclass="text-danger"
-                                       th:errors="${wizytaDto.klientId}">
-                                    </p>
-                                </div>
-                                <div class="col-sm-2 mr-4">
-                                    <label for="dataWizyty">Data<span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control form-control-user" id="dataWizyty" th:field="${wizytaDto.dataWizyty}">
-                                    <p th:if="${#fields.hasErrors('dataWizyty')}"
-                                       th:errorclass="text-danger"
-                                       th:errors="${wizytaDto.dataWizyty}"></p>
-                                </div>
-                                <div class="col-sm-2 mr-4">
-                                    <label for="godzina">Godzina<span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control form-control-user" id="godzina" th:field="${wizytaDto.godzina}">
-                                    <p th:if="${#fields.hasErrors('godzina')}"
-                                       th:errorclass="text-danger"
-                                       th:errors="${wizytaDto.godzina}"></p>
-                                </div>
-                                <div class="col-sm-1 mr-4">
-                                    <label for="pokoj">Pokój<span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control form-control-user" id="pokoj" th:field="${wizytaDto.pokoj}">
-                                    <p th:if="${#fields.hasErrors('pokoj')}"
-                                       th:errorclass="text-danger"
-                                       th:errors="${wizytaDto.pokoj}"></p>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <div class="col-sm-3 mb-2 mb-sm-0 ml-3 mr-4">
-                                    <label class="form-label">Czy wizyta została opłacona?<span class="text-danger">*</span></label>
-                                    <div class="d-flex">
-                                        <div class="form-check me-4 mt-2 mr-3">
-                                            <input class="form-check-input" type="radio" name="czyOplacona" id="oplacona" value="1">
-                                            <label class="form-check-label" for="oplacona">
-                                                Tak
+                        <form class="user"
+                              method="post"
+                              th:object="${dokumentDto}"
+                              enctype="multipart/form-data">
+
+                            <input type="hidden"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}" />
+                            <input type="hidden"
+                                   th:field="*{parentId}" />
+
+                            <div class="row">
+                                <!-- Left column -->
+                                <div class="col-sm-6 ml-4">
+                                    <div class="form-group row">
+                                        <div class="col-sm-5 mb-2 mr-4">
+                                            <label for="nazwaDokumentu">
+                                                Nazwa <span class="text-danger">*</span>
                                             </label>
+                                            <input type="text"
+                                                   class="form-control form-control-user"
+                                                   id="nazwaDokumentu"
+                                                   th:field="*{nazwaDokumentu}" />
+                                            <p th:if="${#fields.hasErrors('nazwaDokumentu')}"
+                                               th:errorclass="text-danger"
+                                               th:errors="*{nazwaDokumentu}">
+                                            </p>
                                         </div>
-                                        <div class="form-check mt-2 mr-3">
-                                            <input class="form-check-input" type="radio" name="czyOplacona" id="nieoplacona" value="0" checked>
-                                            <label class="form-check-label" for="nieoplacona">
-                                                Nie
+
+                                        <div class="col-sm-4 mb-2 mr-4">
+                                            <label for="typ">
+                                                Typ <span class="text-danger">*</span>
                                             </label>
+                                            <select class="form-control form-control-user form-select custom-select"
+                                                    id="typ"
+                                                    th:field="*{typ}">
+                                                <option value="Umowa">Umowa</option>
+                                                <option value="Faktura">Faktura</option>
+                                                <option value="Formularz">Formularz</option>
+                                                <option value="Raport">Raport</option>
+                                                <option value="Reklamacja">Reklamacja</option>
+                                                <option value="Inne">Inne</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-12">
+                                            <label class="form-label">
+                                                Czy status dokumentu jest zakończony?
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="d-flex">
+                                                <div class="form-check me-4 mr-3">
+                                                    <input class="form-check-input"
+                                                           type="radio"
+                                                           name="status"
+                                                           id="zakonczony"
+                                                           value="1" />
+                                                    <label class="form-check-label"
+                                                           for="zakonczony">
+                                                        Tak
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mr-3">
+                                                    <input class="form-check-input"
+                                                           type="radio"
+                                                           name="status"
+                                                           id="niezakonczony"
+                                                           value="0"
+                                                           checked />
+                                                    <label class="form-check-label"
+                                                           for="niezakonczony">
+                                                        Nie
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-9 mb-2">
+                                            <label for="uwagi">Uwagi</label>
+                                            <input type="text"
+                                                   class="form-control form-control-user comments"
+                                                   id="uwagi"
+                                                   th:field="*{uwagi}" />
+                                            <p th:if="${#fields.hasErrors('uwagi')}"
+                                               th:errorclass="text-danger"
+                                               th:errors="*{uwagi}">
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-sm-2 mb-2 mb-sm-0 mr-4">
-                                    <label for="naleznosc">Należność<span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control form-control-user" id="naleznosc" th:field="${wizytaDto.naleznosc}">
-                                    <p th:if="${#fields.hasErrors('naleznosc')}"
-                                       th:errorclass="text-danger"
-                                       th:errors="${wizytaDto.naleznosc}"></p>
-                                </div>
-                                <div class="col-sm-2 mb-2 mb-sm-0 mr-4 position-relative">
-                                    <label for="sposobPlatnosci">
-                                        Sposób płatności <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-control form-control-user form-select custom-select"
-                                            id="sposobPlatnosci"
-                                            th:field="${wizytaDto.sposobPlatnosci}">
-                                        <option value="Karta kredytowa">Karta kredytowa</option>
-                                        <option value="Gotówka">Gotówka</option>
-                                        <option value="Blik">Blik</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <div class="col-sm-6 mb-2 mb-sm-0 ml-3 mr-4">
-                                    <label for="uwagi">Uwagi</label>
-                                    <input type="text" class="form-control form-control-user comments" id="uwagi" th:field="${wizytaDto.uwagi}">
-                                    <p th:if="${#fields.hasErrors('uwagi')}"
-                                       th:errorclass="text-danger"
-                                       th:errors="${wizytaDto.uwagi}"></p>
-                                </div>
-                            </div>
-                            <div class="row mt-5">
-                                <div class="col-sm-9 mb-2 mb-sm-0 ml-3 mr-3">
-                                </div>
-                                <div class="col-sm-1 mb-2 mb-sm-0 mr-3">
-                                    <button type="submit" class="btn btn-primary btn-user btn-block">
-                                        Zapisz
-                                    </button>
-                                </div>
-                                <div class="col-sm-1 mr-4">
-                                    <a th:href="@{/wizyty}" class="btn btn-danger btn-user btn-block">
-                                        Anuluj
-                                    </a>
+
+                                <!-- Right column -->
+                                <div class="col-sm-5 ml-5">
+                                    <div class="card">
+                                        <div class="card-body pt-1 pb-0">
+                                            <button class="btn btn-primary btn-sm mb-3 pl-3 pr-3"
+                                                    type="button"
+                                                    data-toggle="collapse"
+                                                    data-target="#collapseForm"
+                                                    aria-expanded="false">
+                                                <i class="fas fa-plus fa-sm text-white-50 mr-1"></i> Dodaj plik
+                                            </button>
+
+                                            <div class="collapse mb-3" id="collapseForm">
+                                                <input type="file" name="file" class="form-control add-file mb-3" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-5"></div>
+                                    <div class="row mt-5"></div>
+                                    <div class="row mt-5">
+                                        <div class="col-sm-4 mb-2 mb-sm-0 ml-3 mr-3">
+                                        </div>
+                                        <div class="col-sm-3 mb-2 mb-sm-0 mr-3">
+                                            <button type="submit"
+                                                    class="btn btn-primary btn-user btn-block">
+                                                Zapisz
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-3 mr-4">
+                                            <a th:href="@{/dokumenty}"
+                                               class="btn btn-danger btn-user btn-block">
+                                                Anuluj
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -299,8 +328,6 @@
 <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/vendor/datatables/jquery.dataTables.min.js}"></script>
 <script th:src="@{/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
-<script th:src="@{/vendor/select2/select2.min.js}"></script>
-<script th:src="@{/js/demo/select2-demo.js}"></script>
 
 </body>
 </html>

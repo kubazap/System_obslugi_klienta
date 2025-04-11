@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Wizyty</title>
+    <title>Dokumenty</title>
 
     <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
@@ -33,8 +33,8 @@
         <!-- Divider -->
         <hr class="sidebar-divider my-0">
 
-        <!-- Nav Item - Wizyty (aktywne) -->
-        <li class="nav-item active">
+        <!-- Nav Item - Wizyty -->
+        <li class="nav-item">
             <a class="nav-link" th:href="@{/wizyty}">
                 <i class="fas fa-fw fa-calendar-week"></i>
                 <span class="ml-1">Wizyty</span>
@@ -49,8 +49,8 @@
             </a>
         </li>
 
-        <!-- Nav Item - Dokumenty -->
-        <li class="nav-item">
+        <!-- Nav Item - Dokumenty (aktywne) -->
+        <li class="nav-item active">
             <a class="nav-link" th:href="@{/dokumenty}">
                 <i class="fas fa-fw fa-file"></i>
                 <span class="ml-1">Dokumenty</span>
@@ -80,7 +80,7 @@
             <nav class="navbar navbar-expand navbar-light topbar mb-4 mt-2 static-top">
 
                 <!-- Page Heading -->
-                <h1 class="h2 ml-3 mt-2 font-weight-bold">WIZYTY</h1>
+                <h1 class="h2 ml-3 mt-2 font-weight-bold">DOKUMENTY</h1>
 
                 <!-- Topbar Navbar -->
                 <ul class="navbar-nav ml-auto">
@@ -153,54 +153,48 @@
                 <!-- DataTales - Klienci -->
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-sm-flex align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold">Lista wizyt</h6>
-                        <a th:href="@{/wizyty/dodaj}" class="d-none d-sm-inline-block btn btn-primary shadow-sm mr-2">
-                            <i class="fas fa-user-plus fa-sm text-white-50 mr-1"></i> Nowa wizyta
+                        <h6 class="m-0 font-weight-bold">Lista dokumentów</h6>
+                        <a th:href="@{/dokumenty/dodaj}" class="d-none d-sm-inline-block btn btn-primary shadow-sm mr-2">
+                            <i class="fas fa-user-plus fa-sm text-white-50 mr-1"></i> Nowy dokument
                         </a>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="dataTableWizyty" width="100%" cellspacing="0">
+                            <table class="table table-bordered" id="dataTableDokumenty" width="100%" cellspacing="0">
                                 <thead>
                                 <tr>
-                                    <th>Godzina</th>
-                                    <th>Data</th>
-                                    <th>Imię i nazwisko</th>
-                                    <th>Pokój</th>
-                                    <th>Płatność</th>
-                                    <th>Należność</th>
+                                    <th>Nazwa</th>
+                                    <th>Typ</th>
+                                    <th>Data dodania</th>
+                                    <th>Status</th>
                                     <th>Operacje</th>
                                 </tr>
                                 </thead>
                                 <tfoot>
                                 <tr>
-                                    <th>Godzina</th>
-                                    <th>Data</th>
-                                    <th>Imię i nazwisko</th>
-                                    <th>Pokój</th>
-                                    <th>Płatność</th>
-                                    <th>Należność</th>
+                                    <th>Nazwa</th>
+                                    <th>Typ</th>
+                                    <th>Data dodania</th>
+                                    <th>Status</th>
                                     <th>Operacje</th>
                                 </tr>
                                 </tfoot>
                                 <tbody>
-                                    <tr th:each="wizyty : ${wizyty}">
-                                        <td th:text="${wizyty.godzina}"></td>
-                                        <td th:text="${wizyty.dataWizyty.toString().substring(0, 10)}"></td>
-                                        <td th:text="@{${wizyty.klient.imie} + ' ' + ${wizyty.klient.nazwisko}}"></td>
-                                        <td th:text="${wizyty.pokoj}"></td>
-                                        <td th:classappend="${wizyty.czyOplacona} ? 'text-success' : 'text-danger'"
-                                            th:text="${wizyty.czyOplacona} ? 'Opłacone' : 'Nieopłacone'">
+                                    <tr th:each="dokumenty : ${dokumenty}">
+                                        <td th:text="${dokumenty.nazwaDokumentu}"></td>
+                                        <td th:text="${dokumenty.typ}"></td>
+                                        <td th:text="${dokumenty.dataDodania.toString().substring(0, 10)}"></td>
+                                        <td th:classappend="${dokumenty.status} ? 'text-success' : 'text-danger'"
+                                            th:text="${dokumenty.status} ? 'Zakończone' : 'Niezakończone'">
                                         </td>
-                                        <td th:text="${wizyty.naleznosc}"></td>
 
                                         <td style="white-space:nowrap">
                                             <a class="btn btn-primary btn-sm mr-2"
-                                            th:href="@{/wizyty/edytuj(id=${wizyty.id})}">
+                                            th:href="@{/dokumenty/edytuj(id=${dokumenty.id})}">
                                                 <i class="fas fa-pen text-white"></i>
                                             </a>
                                             <a class="btn btn-danger btn-sm"
-                                               th:href="@{/wizyty/usun(id=${wizyty.id})}"
+                                               th:href="@{/dokumenty/usun(id=${dokumenty.id})}"
                                                onClick="return confirm('Jesteś pewny?')">
                                                 <i class="fas fa-trash text-white"></i>
                                             </a>

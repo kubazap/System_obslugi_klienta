@@ -31,4 +31,18 @@ $(document).ready(function() {
       url: 'vendor/datatables/pl.json'
     }
   });
+  $('#dataTableDokumenty').DataTable({
+      autoWidth: false,
+      columnDefs: [
+            { targets: 0, width: '30%' },
+            { targets: 1, width: '20%' },
+            { targets: 2, width: '20%' },
+            { targets: 3, width: '23%' },
+            { targets: 4, width: '7%' }
+        ],
+      destroy: true,
+      language: {
+        url: 'vendor/datatables/pl.json'
+      }
+    });
 });

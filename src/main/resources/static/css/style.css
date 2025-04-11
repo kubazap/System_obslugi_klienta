@@ -1800,8 +1800,28 @@ pre code {
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
+.add-file {
+  padding: 1rem;
+  font-size: 0.85rem;
+  height: auto;
+}
+
+input::file-selector-button {
+  margin-right: 0.675rem;
+}
+
+.table-files th, .table-files td {
+  font-size: 0.85rem;
+}
+
 .comments {
   height: calc(5.5em + 0.5rem + 2px);
+}
+
+@media (max-width: 1320px) {
+  .hide-ops-col {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
