@@ -11,10 +11,8 @@ public class DokumentDto {
     private String nazwaDokumentu;
     @NotEmpty(message= "Pole typu jest wymagane.")
     private String typ;
-    private String nazwaPliku;
     private Boolean status;
     private String uwagi;
-    private Integer parentId;
 
     public Date getDataDodania() {
         return dataDodania;
@@ -34,12 +32,6 @@ public class DokumentDto {
     public void setTyp(String typ) {
         this.typ = typ;
     }
-    public String getNazwaPliku() {
-        return nazwaPliku;
-    }
-    public void setNazwaPliku(String nazwaPliku) {
-        this.nazwaPliku = nazwaPliku;
-    }
     public Boolean getStatus() {
         return status;
     }
@@ -51,11 +43,5 @@ public class DokumentDto {
     }
     public void setUwagi(String uwagi) {
         this.uwagi = uwagi;
-    }
-    public Integer getParentId() {
-        return parentId;
-    }
-    public void setParentId(Integer parentId) {
-        this.parentId = parentId;
     }
 }

@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pl.zapala.system_obslugi_klienta.models.Dokument;
 import pl.zapala.system_obslugi_klienta.models.DokumentDto;
+import pl.zapala.system_obslugi_klienta.models.Plik;
 import pl.zapala.system_obslugi_klienta.repositories.RepozytoriumDokumentow;
+import pl.zapala.system_obslugi_klienta.repositories.RepozytoriumPlikow;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,17 +30,12 @@ import java.util.List;
 public class DokumentController {
     @Autowired
     private RepozytoriumDokumentow dokumentyRepo;
+    @Autowired
+    private RepozytoriumPlikow plikiRepo;
 
     @GetMapping({"", "/"})
     public String getDokumenty(Model model) {
-        var dokumenty = dokumentyRepo.findAll();
-        model.addAttribute("dokumenty", dokumenty);
-        return "dokumenty/index";
-    }
-
-    @GetMapping("/listByParent")
-    public String getDokumentyByParent(@RequestParam int parentId, Model model) {
-        var dokumenty = dokumentyRepo.findAllByParentId(parentId);
+        List<Dokument> dokumenty = dokumentyRepo.findAll();
         model.addAttribute("dokumenty", dokumenty);
         return "dokumenty/index";
     }
@@ -50,70 +47,54 @@ public class DokumentController {
     }
 
     @PostMapping("/dodaj")
-    public String addDokument(@Valid @ModelAttribute("dokumentDto") DokumentDto dokumentDto,
-                              BindingResult result,
-                              @RequestParam(required = false) MultipartFile file) {
-
-        if (result.hasErrors()) {
+    public String addDokumentWithPlik(@Valid @ModelAttribute("dokumentDto") DokumentDto dokumentDto,
+                                      BindingResult result,
+                                      @RequestParam(required = false) MultipartFile file) {
+        if(result.hasErrors()){
             return "dokumenty/dodaj";
         }
-
         try {
             Dokument dokument = new Dokument();
-
             dokument.setNazwaDokumentu(dokumentDto.getNazwaDokumentu());
             dokument.setTyp(dokumentDto.getTyp());
             dokument.setUwagi(dokumentDto.getUwagi());
             dokument.setStatus(dokumentDto.getStatus());
-            dokument.setParentId(dokumentDto.getParentId());
+            dokument.setDataDodania(new Date(System.currentTimeMillis()));
+            dokumentyRepo.save(dokument);
 
-            java.util.Date utilDate = new java.util.Date();
-            java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
-            dokument.setDataDodania(sqlDate);
-
-            if (file != null && !file.isEmpty()) {
-                String oryginalnaNazwa = file.getOriginalFilename();
-                String rozszerzenie = "";
-                if (oryginalnaNazwa != null && oryginalnaNazwa.contains(".")) {
-                    rozszerzenie = oryginalnaNazwa.substring(oryginalnaNazwa.lastIndexOf('.'));
+            if (file != null && !file.isEmpty()){
+                long currentTime = System.currentTimeMillis();
+                String originalFilename = file.getOriginalFilename();
+                String extension = "";
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
                 }
-                String nazwaPliku = System.currentTimeMillis() + rozszerzenie;
-
+                String storageFileName = currentTime + extension;
                 String uploadDir = "storage/dokumenty/";
                 Path uploadPath = Paths.get(uploadDir);
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
-
                 try (InputStream inputStream = file.getInputStream()) {
-                    Files.copy(
-                            inputStream,
-                            uploadPath.resolve(nazwaPliku),
-                            StandardCopyOption.REPLACE_EXISTING
-                    );
+                    Files.copy(inputStream, uploadPath.resolve(storageFileName),
+                            StandardCopyOption.REPLACE_EXISTING);
                 }
-
-                dokument.setNazwaPliku(nazwaPliku);
-
-            } else {
-                dokument.setNazwaPliku(dokumentDto.getNazwaPliku());
+                Plik plik = new Plik();
+                plik.setDataDodania(new Date(currentTime));
+                plik.setNazwaPliku(storageFileName);
+                plik.setDokument(dokument);
+                dokument.getPliki().add(plik);
+                dokumentyRepo.save(dokument);
             }
-
-            dokumentyRepo.save(dokument);
-            dokument.setParentId(dokument.getId());
-            dokumentyRepo.save(dokument);
-
-        } catch (Exception ex) {
+        } catch(Exception ex){
             ex.printStackTrace();
         }
-
         return "redirect:/dokumenty";
     }
 
     @GetMapping("/edytuj")
     public String editDokument(@RequestParam int id, Model model) {
         Dokument dokument = dokumentyRepo.findById(id).orElse(null);
-
         if (dokument == null) {
             return "redirect:/dokumenty";
         }
@@ -124,14 +105,10 @@ public class DokumentController {
         dokumentDto.setUwagi(dokument.getUwagi());
         dokumentDto.setStatus(dokument.getStatus());
         dokumentDto.setDataDodania(dokument.getDataDodania());
-        dokumentDto.setNazwaPliku(dokument.getNazwaPliku());
-        dokumentDto.setParentId(dokument.getId());
-
-        List<Dokument> dokumentyPowiazane = dokumentyRepo.findAllByParentId(dokument.getId());
 
         model.addAttribute("dokument", dokument);
         model.addAttribute("dokumentDto", dokumentDto);
-        model.addAttribute("dokumenty", dokumentyPowiazane);
+        model.addAttribute("pliki", dokument.getPliki());
 
         return "dokumenty/edytuj";
     }
@@ -144,130 +121,110 @@ public class DokumentController {
                                  @RequestParam(required = false) MultipartFile file) {
         if (result.hasErrors()) {
             Dokument dok = dokumentyRepo.findById(id).orElse(null);
-            if (dok != null && dok.getParentId() != null) {
-                model.addAttribute("dokumenty", dokumentyRepo.findAllByParentId(dok.getParentId()));
+            if (dok != null) {
+                model.addAttribute("pliki", dok.getPliki());
             } else {
-                model.addAttribute("dokumenty", Collections.emptyList());
+                model.addAttribute("pliki", Collections.emptyList());
             }
-            return "dokumenty/edytuj";
+            return "redirect:/dokumenty/edytuj?id=" + id;
         }
 
         Dokument dokument = dokumentyRepo.findById(id).orElse(null);
         if (dokument == null) {
-            return "redirect:/dokumenty";
+            return "redirect:/dokumenty/edytuj?id=" + id;
         }
-
         try {
             dokument.setNazwaDokumentu(dokumentDto.getNazwaDokumentu());
             dokument.setTyp(dokumentDto.getTyp());
             dokument.setUwagi(dokumentDto.getUwagi());
             dokument.setStatus(dokumentDto.getStatus());
-            dokument.setParentId(dokumentDto.getParentId());
-
-            java.util.Date utilDate = new java.util.Date();
-            java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
-            dokument.setDataDodania(sqlDate);
-
-            if (file != null && !file.isEmpty()) {
-                if (dokument.getNazwaPliku() != null) {
-                    Path oldFilePath = Paths.get("storage/dokumenty/" + dokument.getNazwaPliku());
-                    if (Files.exists(oldFilePath)) {
-                        Files.delete(oldFilePath);
-                    }
-                }
-
-                String oryginalnaNazwa = file.getOriginalFilename();
-                String rozszerzenie = "";
-                if (oryginalnaNazwa != null && oryginalnaNazwa.contains(".")) {
-                    rozszerzenie = oryginalnaNazwa.substring(oryginalnaNazwa.lastIndexOf('.'));
-                }
-                String nazwaPliku = System.currentTimeMillis() + rozszerzenie;
-
-                String uploadDir = "storage/dokumenty/";
-                Path uploadPath = Paths.get(uploadDir);
-
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
-
-                try (InputStream inputStream = file.getInputStream()) {
-                    Files.copy(
-                            inputStream,
-                            uploadPath.resolve(nazwaPliku),
-                            StandardCopyOption.REPLACE_EXISTING
-                    );
-                }
-                dokument.setNazwaPliku(nazwaPliku);
-            }
+            dokument.setDataDodania(new Date(System.currentTimeMillis()));
 
             dokumentyRepo.save(dokument);
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
         return "redirect:/dokumenty";
     }
 
-    @GetMapping("/pobierzPlik")
-    public ResponseEntity<Object> pobierzPlik(@RequestParam int dokumentId) {
+    @PostMapping("/edytuj/dodajPlik")
+    public String addAnotherPlikToDokument(@RequestParam int id,
+                                    @RequestParam MultipartFile file) {
         try {
-            Dokument dokument = dokumentyRepo.findById(dokumentId).orElse(null);
+            if (file == null || file.isEmpty()) {
+                return "redirect:/dokumenty/edytuj?id=" + id;
+            }
+            Dokument dokument = dokumentyRepo.findById(id).orElse(null);
             if (dokument == null) {
-                return ResponseEntity.notFound().build();
+                return "redirect:/dokumenty/";
             }
 
-            File file = new File("storage/dokumenty/" + dokument.getNazwaPliku());
-            if (!file.exists()) {
-                return ResponseEntity.notFound().build();
+            long currentTime = System.currentTimeMillis();
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+            }
+            String storageFileName = currentTime + extension;
+            String uploadDir = "storage/dokumenty/";
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, uploadPath.resolve(storageFileName),
+                        StandardCopyOption.REPLACE_EXISTING);
             }
 
-            InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+            Plik plik = new Plik();
+            plik.setDataDodania(new Date(currentTime));
+            plik.setNazwaPliku(storageFileName);
+            plik.setDokument(dokument);
 
-            String nazwaPliku = dokument.getNazwaPliku();
-            String rozszerzenie = "";
-            int dotIndex = nazwaPliku.lastIndexOf('.');
-            if (dotIndex > 0) {
-                rozszerzenie = nazwaPliku.substring(dotIndex);
-            }
-
-            String przyjaznaNazwa = dokument.getNazwaDokumentu() + rozszerzenie;
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + przyjaznaNazwa + "\"")
-                    .contentLength(file.length())
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(resource);
-
+            dokument.getPliki().add(plik);
+            dokumentyRepo.save(dokument);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        return "redirect:/dokumenty/edytuj?id=" + id;
+    }
 
+    @GetMapping("/pobierzPlik")
+    public ResponseEntity<Object> pobierzPlik(@RequestParam int fileId) {
+        try {
+            Plik plik = plikiRepo.findById(fileId).orElse(null);
+            if (plik == null) {
+                return ResponseEntity.notFound().build();
+            }
+            File file = new File("storage/dokumenty/" + plik.getNazwaPliku());
+            if (!file.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                    .contentLength(file.length())
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/usunPlik")
-    public String usunPlik(@RequestParam int dokumentId) {
+    public String usunPlik(@RequestParam int documentId, @RequestParam int fileId) {
         try {
-            Dokument dokument = dokumentyRepo.findById(dokumentId).orElse(null);
-            if (dokument == null) {
-                return "redirect:/dokumenty";
+            Plik plik = plikiRepo.findById(fileId).orElse(null);
+            if (plik != null) {
+                Path filePath = Paths.get("storage/dokumenty/" + plik.getNazwaPliku());
+                Files.deleteIfExists(filePath);
+                plikiRepo.delete(plik);
             }
-
-            Path filePath = Paths.get("storage/dokumenty/" + dokument.getNazwaPliku());
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
-            }
-
-            dokument.setNazwaPliku(null);
-            dokumentyRepo.save(dokument);
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
-        return "redirect:/dokumenty/edytuj?id=" + dokumentId;
+        return "redirect:/dokumenty/edytuj?id=" + documentId;
     }
 
     @GetMapping("/usun")
@@ -277,18 +234,20 @@ public class DokumentController {
             if (dokument == null) {
                 return "redirect:/dokumenty";
             }
-
-            Path filePath = Paths.get("storage/dokumenty/" + dokument.getNazwaPliku());
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
+            if (dokument.getPliki() != null) {
+                for (Plik plik : dokument.getPliki()) {
+                    try {
+                        Path filePath = Paths.get("storage/dokumenty/" + plik.getNazwaPliku());
+                        Files.deleteIfExists(filePath);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
-
             dokumentyRepo.delete(dokument);
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
         return "redirect:/dokumenty";
     }
 }

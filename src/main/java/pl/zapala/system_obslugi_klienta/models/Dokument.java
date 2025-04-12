@@ -3,6 +3,8 @@ package pl.zapala.system_obslugi_klienta.models;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="dokumenty")
@@ -14,9 +16,9 @@ public class Dokument {
     private String typ; // Umowa, Faktura, Formularz, Raport, Reklamacja, Inne
     private Date dataDodania;
     private Boolean status;
-    private String nazwaPliku;
     private String uwagi;
-    private Integer parentId;
+    @OneToMany(mappedBy="dokument", cascade = CascadeType.ALL)
+    private List<Plik> pliki = new ArrayList<>();
 
     public Integer getId() {
         return id;
@@ -48,22 +50,16 @@ public class Dokument {
     public void setStatus(Boolean status) {
         this.status = status;
     }
-    public String getNazwaPliku() {
-        return nazwaPliku;
-    }
-    public void setNazwaPliku(String nazwaPliku) {
-        this.nazwaPliku = nazwaPliku;
-    }
     public String getUwagi() {
         return uwagi;
     }
     public void setUwagi(String uwagi) {
         this.uwagi = uwagi;
     }
-    public Integer getParentId() {
-        return parentId;
+    public List<Plik> getPliki() {
+        return pliki;
     }
-    public void setParentId(Integer parentId) {
-        this.parentId = parentId;
+    public void setPliki(List<Plik> pliki) {
+        this.pliki = pliki;
     }
 }

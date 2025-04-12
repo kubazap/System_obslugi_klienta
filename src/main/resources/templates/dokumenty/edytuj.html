@@ -153,44 +153,25 @@
                     <div class="card-header py-3 d-sm-flex align-items-center justify-content-between">
                         <h6 class="m-0 font-weight-bold">Dane dokumentu</h6>
                     </div>
-
                     <div class="card-body">
-                        <form class="user"
-                              method="post"
-                              th:object="${dokumentDto}"
-                              enctype="multipart/form-data">
-
-                            <input type="hidden"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}" />
-
-                            <input type="hidden" th:field="*{parentId}" />
-
-                            <div class="row">
-                                <!-- Left column -->
-                                <div class="col-sm-6 ml-4">
+                        <div class="row">
+                            <!-- Left column -->
+                            <div class="col-sm-6 ml-4">
+                                <form class="user" method="post" th:object="${dokumentDto}">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <div class="form-group row">
                                         <div class="col-sm-5 mb-2 mr-4">
                                             <label for="nazwaDokumentu">
                                                 Nazwa <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text"
-                                                   class="form-control form-control-user"
-                                                   id="nazwaDokumentu"
-                                                   th:field="*{nazwaDokumentu}" />
-                                            <p th:if="${#fields.hasErrors('nazwaDokumentu')}"
-                                               th:errorclass="text-danger"
-                                               th:errors="*{nazwaDokumentu}">
-                                            </p>
+                                            <input type="text" class="form-control form-control-user" id="nazwaDokumentu" th:field="*{nazwaDokumentu}" />
+                                            <p th:if="${#fields.hasErrors('nazwaDokumentu')}" th:errorclass="text-danger" th:errors="*{nazwaDokumentu}"></p>
                                         </div>
-
                                         <div class="col-sm-4 mb-2 mr-4">
                                             <label for="typ">
                                                 Typ <span class="text-danger">*</span>
                                             </label>
-                                            <select class="form-control form-control-user form-select custom-select"
-                                                    id="typ"
-                                                    th:field="*{typ}">
+                                            <select class="form-control form-control-user form-select custom-select" id="typ" th:field="*{typ}">
                                                 <option value="Umowa">Umowa</option>
                                                 <option value="Faktura">Faktura</option>
                                                 <option value="Formularz">Formularz</option>
@@ -200,7 +181,6 @@
                                             </select>
                                         </div>
                                     </div>
-
                                     <div class="form-group row">
                                         <div class="col-sm-12">
                                             <label class="form-label">
@@ -209,116 +189,81 @@
                                             </label>
                                             <div class="d-flex">
                                                 <div class="form-check me-4 mr-3">
-                                                    <input class="form-check-input"
-                                                           type="radio"
-                                                           name="status"
-                                                           id="zakonczony"
-                                                           value="1" />
-                                                    <label class="form-check-label"
-                                                           for="zakonczony">
-                                                        Tak
-                                                    </label>
+                                                    <input class="form-check-input" type="radio" name="status" id="zakonczony" value="1" />
+                                                    <label class="form-check-label" for="zakonczony">Tak</label>
                                                 </div>
                                                 <div class="form-check mr-3">
-                                                    <input class="form-check-input"
-                                                           type="radio"
-                                                           name="status"
-                                                           id="niezakonczony"
-                                                           value="0"
-                                                           checked />
-                                                    <label class="form-check-label"
-                                                           for="niezakonczony">
-                                                        Nie
-                                                    </label>
+                                                    <input class="form-check-input" type="radio" name="status" id="niezakonczony" value="0" checked />
+                                                    <label class="form-check-label" for="niezakonczony">Nie</label>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="form-group row">
                                         <div class="col-sm-9 mb-2">
                                             <label for="uwagi">Uwagi</label>
-                                            <input type="text"
-                                                   class="form-control form-control-user comments"
-                                                   id="uwagi"
-                                                   th:field="*{uwagi}" />
-                                            <p th:if="${#fields.hasErrors('uwagi')}"
-                                               th:errorclass="text-danger"
-                                               th:errors="*{uwagi}">
-                                            </p>
+                                            <input type="text" class="form-control form-control-user comments" id="uwagi" th:field="*{uwagi}" />
+                                            <p th:if="${#fields.hasErrors('uwagi')}" th:errorclass="text-danger" th:errors="*{uwagi}"></p>
                                         </div>
                                     </div>
-                                </div>
-
-                                <!-- Right column -->
-                                <div class="col-sm-5 ml-5 ml-sm-0">
-                                    <div class="card">
-                                        <div class="card-body pt-1 pb-0 pl-sm-0 pl-xl-2 pr-xl-2">
-                                            <button class="btn btn-primary btn-sm mb-3 pl-3 pr-3"
-                                                    type="button"
-                                                    data-toggle="collapse"
-                                                    data-target="#collapseForm"
-                                                    aria-expanded="false">
-                                                <i class="fas fa-plus fa-sm text-white-50 mr-1"></i> Dodaj plik
-                                            </button>
-
-                                            <div class="collapse mb-3" id="collapseForm">
-                                                <input type="file" name="file" class="form-control add-file mb-3" />
-                                            </div>
-
-                                            <table class="table table-files">
-                                                <thead>
-                                                <tr>
-                                                    <th>Dokument</th>
-                                                    <th>Dodany</th>
-                                                    <th class="hide-ops-col">Operacje</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                <tr th:each="dokumenty : ${dokumenty}"
-                                                    th:if="${dokumenty.nazwaPliku} != null">
-                                                    <td>
-                                                        <a download
-                                                           th:text="${dokumenty.nazwaPliku}"
-                                                           th:href="@{/dokumenty/pobierzPlik(dokumentId=${dokumenty.id})}">
-                                                        </a>
-                                                    </td>
-                                                    <td th:text="${dokumenty.dataDodania.toString().substring(0, 10)}">
-                                                    </td>
-                                                    <td class="hide-ops-col">
-                                                        <a class="btn btn-danger btn-sm"
-                                                           th:href="@{/dokumenty/usunPlik(dokumentId=${dokumenty.id})}"
-                                                           onclick="return confirm('Na pewno usunąć ten dokument?')">
-                                                            <i class="fas fa-trash text-white"></i>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mt-5"></div>
-                                    <div class="row mt-5"></div>
                                     <div class="row mt-5">
-                                        <div class="col-md-3 col-sm-2 mb-2 mb-sm-0 ml-3 mr-4">
+                                        <div class="col-sm-2 mb-2 mb-sm-0 mr-3">
+                                            <button type="submit" class="btn btn-primary btn-user btn-block">Zapisz</button>
                                         </div>
-                                        <div class="col-sm-3 mb-2 mb-sm-0 mr-3">
-                                            <button type="submit"
-                                                    class="btn btn-primary btn-user btn-block">
-                                                Zapisz
-                                            </button>
+                                        <div class="col-sm-2 mr-4">
+                                            <a th:href="@{/dokumenty}" class="btn btn-danger btn-user btn-block">Anuluj</a>
                                         </div>
-                                        <div class="col-sm-3 mr-4">
-                                            <a th:href="@{/dokumenty}"
-                                               class="btn btn-danger btn-user btn-block">
-                                                Anuluj
-                                            </a>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- Right column -->
+                            <div class="col-sm-5 ml-5 ml-sm-0">
+                                <div class="card">
+                                    <div class="card-body pt-1 pb-0 pl-sm-0 pl-xl-2 pr-xl-2">
+                                        <button class="btn btn-primary btn-sm mb-3 pl-3 pr-3" type="button" data-toggle="collapse" data-target="#collapseForm" aria-expanded="false">
+                                            <i class="fas fa-plus fa-sm text-white-50 mr-1"></i> Dodaj plik
+                                        </button>
+                                        <div class="collapse mb-3" id="collapseForm">
+                                            <form method="post" action="/dokumenty/edytuj/dodajPlik" enctype="multipart/form-data">
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                                <input type="hidden" name="id" th:value="${dokument.id}" />
+                                                <input type="file" name="file" class="form-control add-file mb-3" />
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <button class="btn btn-sm btn-success ml-3 mr-3 pl-3 pr-3" type="submit">Dodaj</button>
+                                                        <button class="btn btn-sm btn-outline-primary mr-3 pl-3 pr-3" type="button"
+                                                                data-toggle="collapse" data-target="#collapseForm"
+                                                                aria-expanded="false">Anuluj</button>
+                                                    </div>
+                                                </div>
+                                            </form>
                                         </div>
+                                        <table class="table table-files" th:if="${dokument.pliki != null and #lists.size(dokument.pliki) > 0}">
+                                            <thead>
+                                            <tr>
+                                                <th>Plik</th>
+                                                <th>Dodany</th>
+                                                <th class="hide-ops-col">Operacje</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="plik : ${dokument.pliki}" th:if="${plik.nazwaPliku != null}">
+                                                <td>
+                                                    <a download th:text="${plik.nazwaPliku}" th:href="@{/dokumenty/pobierzPlik(fileId=${plik.id})}"></a>
+                                                </td>
+                                                <td th:text="${#dates.format(plik.dataDodania, 'yyyy-MM-dd')}"></td>
+                                                <td class="hide-ops-col">
+                                                    <a class="btn btn-danger btn-sm" th:href="@{/dokumenty/usunPlik(documentId=${dokument.id}, fileId=${plik.id})}" onclick="return confirm('Na pewno usunąć ten plik?')">
+                                                        <i class="fas fa-trash text-white"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
