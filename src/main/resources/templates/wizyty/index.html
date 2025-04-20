@@ -129,7 +129,8 @@
                     <li class="nav-item dropdown no-arrow">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="ml-1 d-none d-lg-inline text-gray-700 figure-caption">Jakub Zapała</span>
+                            <span class="ml-1 d-none d-lg-inline text-gray-700 figure-caption"
+                                  th:text="${pracownik.imie} + ' ' + ${pracownik.nazwisko}"></span>
                             <img class="img-profile rounded-circle" th:src="@{/img/undraw_profile.svg}">
                         </a>
                         <!-- Dropdown - Użytkownik -->
@@ -235,14 +236,16 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <div class="modal-body">Wybierz „Wyloguj” poniżej, jeśli chcesz zakończyć bieżącą sesję.</div>
+            <div class="modal-body">Wybierz „Wyloguj się” poniżej, jeśli chcesz zakończyć bieżącą sesję.</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Anuluj</button>
-                <a class="btn btn-primary" th:href="@{/login}">Wyloguj</a>
+                <a class="btn btn-primary" th:href="@{/login?logout}">Wyloguj się</a>
             </div>
         </div>
     </div>
 </div>
+
+<div id="preloader"></div>
 
 <!-- JS -->
 <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
@@ -250,6 +253,7 @@
 <script th:src="@{/vendor/datatables/jquery.dataTables.min.js}"></script>
 <script th:src="@{/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
 <script th:src="@{/js/demo/datatables-demo.js}"></script>
+<script th:src="@{/js/main.js}"></script>
 
 </body>
 </html>

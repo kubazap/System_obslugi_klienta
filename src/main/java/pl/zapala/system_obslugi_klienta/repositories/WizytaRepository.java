@@ -3,6 +3,6 @@ package pl.zapala.system_obslugi_klienta.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import pl.zapala.system_obslugi_klienta.models.Wizyta;
 
-public interface RepozytoriumWizyty extends JpaRepository<Wizyta, Integer> {
+public interface WizytaRepository extends JpaRepository<Wizyta, Integer> {
 
 }

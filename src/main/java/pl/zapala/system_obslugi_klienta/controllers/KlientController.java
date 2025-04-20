@@ -2,6 +2,8 @@ package pl.zapala.system_obslugi_klienta.controllers;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -9,13 +11,29 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import pl.zapala.system_obslugi_klienta.models.Klient;
 import pl.zapala.system_obslugi_klienta.models.KlientDto;
-import pl.zapala.system_obslugi_klienta.repositories.RepozytoriumKlienta;
+import pl.zapala.system_obslugi_klienta.models.Pracownik;
+import pl.zapala.system_obslugi_klienta.repositories.KlientRepository;
+import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
 
 @Controller
 @RequestMapping("/klienci")
 public class KlientController {
     @Autowired
-    private RepozytoriumKlienta klientRepo;
+    private KlientRepository klientRepo;
+    @Autowired
+    private PracownikRepository pracownikRepo;
+
+    @ModelAttribute
+    public void loggedPracownik(Model model) {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()
+                && !(auth instanceof AnonymousAuthenticationToken)) {
+
+            String email = auth.getName();
+            Pracownik pracownik = pracownikRepo.findByEmail(email);
+            model.addAttribute("pracownik", pracownik);
+        }
+    }
 
     @GetMapping({"","/"})
     public String getKlienci(Model model) {
