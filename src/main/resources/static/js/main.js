@@ -9,6 +9,68 @@
       });
     }
 
+  // Timer
+  $(function() {
+    const timerEl   = document.getElementById('timer');
+    if (timerEl) {
+      let time       = parseInt(timerEl.dataset.remainingSeconds, 10) || 0;
+      const submitBtn  = document.getElementById('submitBtn');
+      const expiredMsg = document.getElementById('expired-message');
+
+      updateTimerText(time);
+
+      const interval = setInterval(() => {
+        time--;
+        if (time >= 0) {
+          updateTimerText(time);
+        }
+        if (time < 0) {
+          clearInterval(interval);
+          submitBtn.disabled = true;
+          document.querySelectorAll('.pin-input').forEach(i => i.disabled = true);
+          expiredMsg.style.display = 'block';
+          timerEl.style.display   = 'none';
+        }
+      }, 1000);
+
+      function updateTimerText(sec) {
+        const m = String(Math.floor(sec / 60)).padStart(2, '0');
+        const s = String(sec % 60).padStart(2, '0');
+        timerEl.textContent = `${m}:${s}`;
+      }
+    }
+  });
+
+  // TOTP
+  $(function() {
+    const inputs = Array.from(document.querySelectorAll('.pin-input'));
+    if (inputs.length === 0) return;
+
+    inputs.forEach((el, idx) => {
+      el.addEventListener('keyup', (e) => {
+        if (e.key === 'Backspace' && idx > 0 && !el.value) {
+          inputs[idx - 1].focus();
+        } else if (el.value && idx < inputs.length - 1) {
+          inputs[idx + 1].focus();
+        }
+      });
+      el.addEventListener('input', () => {
+        el.value = el.value.replace(/[^0-9]/g, '');
+      });
+    });
+    inputs[0].focus();
+
+    window.collectCode = function(ev) {
+      const code = inputs.map(i => i.value).join('');
+      if (code.length !== 6) {
+        ev.preventDefault();
+        alert('Kod musi mieć 6 cyfr!');
+        return false;
+      }
+      document.getElementById('totpFull').value = code;
+    };
+  });
+
   // Toggle the side navigation
   $("#sidebarToggle, #sidebarToggleTop").on("click", function () {
     $("body").toggleClass("sidebar-toggled");

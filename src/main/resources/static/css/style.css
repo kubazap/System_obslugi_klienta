@@ -235,6 +235,17 @@ select {
   text-transform: none;
 }
 
+.login-p {
+  font-size: 0.85rem;
+  text-align: left;
+  margin-bottom: 3rem;
+  margin-left: 1px;
+}
+
+#expired-message {
+  display: none;
+}
+
 [role="button"] {
   cursor: pointer;
 }

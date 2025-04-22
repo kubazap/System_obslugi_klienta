@@ -8,6 +8,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import pl.zapala.system_obslugi_klienta.security.MfaCompletionFilter;
+import pl.zapala.system_obslugi_klienta.security.MfaSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -15,29 +18,28 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           MfaSuccessHandler successHandler,
+                                           MfaCompletionFilter mfaFilter) throws Exception {
+
         return http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/logout",
+                .authorizeHttpRequests(a -> a
+                        .requestMatchers("/", "/login", "/login/authenticate",
                                 "/css/**", "/js/**", "/img/**", "/vendor/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
+                        .anyRequest().authenticated())
+                .formLogin(f -> f
                         .loginPage("/login")
-                        .loginProcessingUrl("/login")
+                        .loginProcessingUrl("/login/authenticate")
                         .usernameParameter("email")
                         .passwordParameter("haslo")
-                        .defaultSuccessUrl("/wizyty", true)
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                )
+                        .successHandler(successHandler))
+                .logout(l -> l.logoutSuccessUrl("/login?logout"))
+                .addFilterAfter(mfaFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
     }
 }

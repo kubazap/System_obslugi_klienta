@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http‑equiv="X‑UA‑Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Dwuetapowa weryfikacja</title>
+
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+    <link rel="icon"
+          type="image/png"
+          th:href="@{/img/favicon.png}" sizes="32x32" />
+
+    <!-- CSS -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <style>
+        /* niewielkie kwadratowe pola na jeden znak */
+        .pin-input {
+            width: 46px;
+            height: 56px;
+            text-align: center;
+            font-size: 26px;
+            margin: 0 4px;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-primary">
+
+<div class="container">
+
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+
+        <div class="col-xl-10 col-lg-12 col-md-9">
+
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+
+                    <div th:if="${param.error}" class="alert alert-danger">
+                        Błędny kod – spróbuj ponownie.
+                    </div>
+                    <div class="alert alert-danger" id="expired-message">
+                        Czas na wprowadzenie kodu minął.
+                        <a th:href="@{/login}">Zaloguj się ponownie</a>.
+                    </div>
+
+                    <div class="row">
+                        <!-- Left column -->
+                        <div class="col-lg-6 d-none d-lg-block p-0">
+                            <img th:src="@{/img/system-call-center.png}"
+                                 alt="Logo"
+                                 class="w-100 h-100"
+                                 style="object-fit: cover;">
+                        </div>
+
+                        <!-- Right column -->
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div>
+                                    <h1 class="h5 text-gray-900 font-weight-bold mb-4 mr-2">POTWIERDŹ SWOJĄ TOŻSAMOŚĆ</h1>
+                                    <p class="login-p">
+                                        Wprowadź kod weryfikacyjny, który właśnie wysłaliśmy na Twój adres e‑mail.
+                                        <span id="timer"
+                                              class="text-danger ml-1"
+                                              th:attr="data-remaining-seconds=${remainingSeconds}"
+                                              th:text="|${#numbers.formatInteger(remainingSeconds / 60,2)}:${#numbers.formatInteger(remainingSeconds % 60,2)}|">
+                                          02:00
+                                        </span>
+                                    </p>
+                                </div>
+
+                                <form th:action="@{/login(mfa='')}" method="post" id="mfaForm">
+                                    <input type="hidden"
+                                           th:name="${_csrf.parameterName}"
+                                           th:value="${_csrf.token}"/>
+
+                                    <div class="d-flex justify-content-center mb-5">
+                                        <input type="text" maxlength="1" pattern="[0-9]*"
+                                               class="form-control pin-input" id="pin1" autocomplete="one-time-code">
+                                        <input type="text" maxlength="1" pattern="[0-9]*"
+                                               class="form-control pin-input" id="pin2">
+                                        <input type="text" maxlength="1" pattern="[0-9]*"
+                                               class="form-control pin-input" id="pin3">
+                                        <input type="text" maxlength="1" pattern="[0-9]*"
+                                               class="form-control pin-input" id="pin4">
+                                        <input type="text" maxlength="1" pattern="[0-9]*"
+                                               class="form-control pin-input" id="pin5">
+                                        <input type="text" maxlength="1" pattern="[0-9]*"
+                                               class="form-control pin-input" id="pin6">
+                                    </div>
+
+                                    <input type="hidden" name="code" id="totpFull">
+
+                                    <button type="submit" id="submitBtn"
+                                            class="btn btn-primary btn-block p-2 mt-5"
+                                            onclick="collectCode(event)">
+                                        Zweryfikuj kod
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- JS -->
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>

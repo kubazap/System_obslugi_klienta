@@ -12,6 +12,7 @@ public class Pracownik {
     private String nazwisko;
     private String email;
     private String haslo;
+    private String totpSecret;
 
     public Integer getId() {
         return id;
@@ -42,5 +43,13 @@ public class Pracownik {
     }
     public void setHaslo(String haslo) {
         this.haslo = haslo;
+    }
+
+    public String getTotpSecret() {
+        return totpSecret;
+    }
+
+    public void setTotpSecret(String totpSecret) {
+        this.totpSecret = totpSecret;
     }
 }
