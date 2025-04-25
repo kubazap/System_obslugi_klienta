@@ -1,4 +1,4 @@
-INSERT INTO `pliki` (`data_dodania`, `nazwa_pliku`, `dokument_id`) VALUES
+INSERT INTO pliki (data_dodania, nazwa_pliku, dokument_id) VALUES
 ('2025-04-12', '1744460008593.pdf', 1),
 ('2025-04-12', '1744460059955.pdf', 2),
 ('2025-04-12', '1744460075428.pdf', 2),
