@@ -77,7 +77,7 @@ public class WizytaController {
 
         if (result.hasErrors()) {
             result.getAllErrors()
-                    .forEach(err -> logger.warn("Błąd walidacji: {}", err.toString()));
+                    .forEach(err -> logger.warn("Błąd walidacji: {}", err));
             return REDIRECT_ADD_WIZYTA;
         }
 
