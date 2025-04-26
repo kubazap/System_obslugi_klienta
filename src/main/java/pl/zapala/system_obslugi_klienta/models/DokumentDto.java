@@ -1,7 +1,6 @@
 package pl.zapala.system_obslugi_klienta.models;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import java.sql.Date;
 

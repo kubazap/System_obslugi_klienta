@@ -1,6 +1,5 @@
 package pl.zapala.system_obslugi_klienta.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -14,8 +13,11 @@ import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
 @Controller
 @RequestMapping("/chat")
 public class ChatController {
-    @Autowired
-    private PracownikRepository pracownikRepo;
+    private final PracownikRepository pracownikRepo;
+
+    public ChatController(PracownikRepository pracownikRepo) {
+        this.pracownikRepo = pracownikRepo;
+    }
 
     @ModelAttribute
     public void loggedPracownik(Model model) {

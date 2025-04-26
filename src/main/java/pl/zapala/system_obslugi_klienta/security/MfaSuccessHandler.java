@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import pl.zapala.system_obslugi_klienta.exception.CodeGenerationFailedException;
 import pl.zapala.system_obslugi_klienta.models.Pracownik;
 import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
 import pl.zapala.system_obslugi_klienta.services.EmailService;
@@ -45,7 +46,7 @@ public class MfaSuccessHandler implements AuthenticationSuccessHandler {
         try {
             code = totp.generateCurrentCode(p.getTotpSecret());
         } catch (CodeGenerationException e) {
-            throw new RuntimeException(e);
+            throw new CodeGenerationFailedException("Nie udało się wygenerować kodu TOTP", e);
         }
         emailService.sendTotpEmail(p.getImie(), p.getEmail(), code);
     }

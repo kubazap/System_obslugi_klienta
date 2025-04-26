@@ -1,7 +1,6 @@
 package pl.zapala.system_obslugi_klienta.controllers;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -18,10 +17,20 @@ import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
 @Controller
 @RequestMapping("/klienci")
 public class KlientController {
-    @Autowired
-    private KlientRepository klientRepo;
-    @Autowired
-    private PracownikRepository pracownikRepo;
+    private static final String REDIRECT_KLIENCI = "redirect:/klienci";
+    private static final String REDIRECT_EDIT_KLIENT = "klienci/edytuj";
+    private static final String REDIRECT_ADD_KLIENT = "klienci/dodaj";
+    private static final String ATTR_KLIENT = "klient";
+    private static final String ATTR_KLIENT_DTO = "klientDto";
+
+    private final KlientRepository klientRepo;
+    private final PracownikRepository pracownikRepo;
+
+    public KlientController(KlientRepository klientRepo,
+                            PracownikRepository pracownikRepo) {
+        this.klientRepo    = klientRepo;
+        this.pracownikRepo = pracownikRepo;
+    }
 
     @ModelAttribute
     public void loggedPracownik(Model model) {
@@ -46,9 +55,9 @@ public class KlientController {
     @GetMapping("/dodaj")
     public String createKlient(Model model) {
         KlientDto klientDto = new KlientDto();
-        model.addAttribute("klientDto", klientDto);
+        model.addAttribute(ATTR_KLIENT_DTO, klientDto);
 
-        return "klienci/dodaj";
+        return REDIRECT_ADD_KLIENT;
     }
 
     @PostMapping("/dodaj")
@@ -56,13 +65,13 @@ public class KlientController {
 
         if(klientRepo.findByEmail(klientDto.getEmail()) != null) {
             result.addError(
-                    new FieldError("klientDto", "email", klientDto.getEmail(),
+                    new FieldError(ATTR_KLIENT_DTO, "email", klientDto.getEmail(),
                             false, null, null, "Klient o takim adresie e-mail już istnieje.")
             );
         }
 
         if(result.hasErrors()) {
-            return "klienci/dodaj";
+            return REDIRECT_ADD_KLIENT;
         }
 
         Klient klient = new Klient();
@@ -77,7 +86,7 @@ public class KlientController {
 
         klientRepo.save(klient);
 
-        return "redirect:/klienci";
+        return REDIRECT_KLIENCI;
     }
 
     @GetMapping("/edytuj")
@@ -86,7 +95,7 @@ public class KlientController {
         Klient klient = klientRepo.findById(id).orElse(null);
 
         if(klient == null) {
-            return "redirect:/klienci";
+            return REDIRECT_KLIENCI;
         }
 
         KlientDto klientDto = new KlientDto();
@@ -99,10 +108,10 @@ public class KlientController {
         klientDto.setEmail(klient.getEmail());
         klientDto.setNumerTelefonu(klient.getNumerTelefonu());
 
-        model.addAttribute("klient", klient);
-        model.addAttribute("klientDto", klientDto);
+        model.addAttribute(ATTR_KLIENT, klient);
+        model.addAttribute(ATTR_KLIENT_DTO, klientDto);
 
-        return "klienci/edytuj";
+        return REDIRECT_EDIT_KLIENT;
     }
 
     @PostMapping("/edytuj")
@@ -111,13 +120,13 @@ public class KlientController {
         Klient klient = klientRepo.findById(id).orElse(null);
 
         if(klient == null) {
-            return "redirect:/klienci";
+            return REDIRECT_KLIENCI;
         }
 
-        model.addAttribute("klient", klient);
+        model.addAttribute(ATTR_KLIENT, klient);
 
         if(result.hasErrors()) {
-            return "klienci/edytuj";
+            return REDIRECT_EDIT_KLIENT;
         }
 
         klient.setImie(klientDto.getImie());
@@ -134,14 +143,14 @@ public class KlientController {
         }
         catch(Exception ex) {
             result.addError(
-                    new FieldError("klientDto", "email", klientDto.getEmail(),
+                    new FieldError(ATTR_KLIENT_DTO, "email", klientDto.getEmail(),
                             false, null, null, "Klient o takim adresie e-mail już istnieje.")
             );
 
-            return "klienci/edytuj";
+            return REDIRECT_EDIT_KLIENT;
         }
 
-        return "redirect:/klienci";
+        return REDIRECT_KLIENCI;
     }
 
     @GetMapping("/usun")
@@ -153,6 +162,6 @@ public class KlientController {
             klientRepo.delete(klient);
         }
 
-        return "redirect:/klienci";
+        return REDIRECT_KLIENCI;
     }
 }

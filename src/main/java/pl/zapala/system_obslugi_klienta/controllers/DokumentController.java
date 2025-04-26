@@ -1,7 +1,6 @@
 package pl.zapala.system_obslugi_klienta.controllers;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import pl.zapala.system_obslugi_klienta.exception.ControllerOperationException;
+import pl.zapala.system_obslugi_klienta.exception.StorageException;
 import pl.zapala.system_obslugi_klienta.models.Dokument;
 import pl.zapala.system_obslugi_klienta.models.DokumentDto;
 import pl.zapala.system_obslugi_klienta.models.Plik;
@@ -21,9 +22,7 @@ import pl.zapala.system_obslugi_klienta.repositories.DokumentRepository;
 import pl.zapala.system_obslugi_klienta.repositories.PlikRepository;
 import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.sql.Date;
 import java.util.Collections;
@@ -32,12 +31,25 @@ import java.util.List;
 @Controller
 @RequestMapping("/dokumenty")
 public class DokumentController {
-    @Autowired
-    private DokumentRepository dokumentyRepo;
-    @Autowired
-    private PlikRepository plikiRepo;
-    @Autowired
-    private PracownikRepository pracownikRepo;
+    private static final String STORAGE_DOKUMENTY_DIR = "storage/dokumenty/";
+    private static final String REDIRECT_DOKUMENTY = "redirect:/dokumenty";
+    private static final String REDIRECT_EDIT_DOKUMENT = "redirect:/dokumenty/edytuj?id=";
+    private static final String REDIRECT_ADD_DOKUMENT = "dokumenty/dodaj";
+    private static final String ATTR_PLIKI = "pliki";
+    private static final String ATTR_DOKUMENT = "dokument";
+    private static final String ATTR_DOKUMENT_DTO = "dokumentDto";
+
+    private final DokumentRepository dokumentyRepo;
+    private final PlikRepository plikiRepo;
+    private final PracownikRepository pracownikRepo;
+
+    public DokumentController(DokumentRepository dokumentyRepo,
+                              PlikRepository plikiRepo,
+                              PracownikRepository pracownikRepo) {
+        this.dokumentyRepo  = dokumentyRepo;
+        this.plikiRepo      = plikiRepo;
+        this.pracownikRepo  = pracownikRepo;
+    }
 
     @ModelAttribute
     public void loggedPracownik(Model model) {
@@ -60,16 +72,16 @@ public class DokumentController {
 
     @GetMapping("/dodaj")
     public String createDokument(Model model) {
-        model.addAttribute("dokumentDto", new DokumentDto());
-        return "dokumenty/dodaj";
+        model.addAttribute(ATTR_DOKUMENT_DTO, new DokumentDto());
+        return REDIRECT_ADD_DOKUMENT;
     }
 
     @PostMapping("/dodaj")
-    public String addDokumentWithPlik(@Valid @ModelAttribute("dokumentDto") DokumentDto dokumentDto,
+    public String addDokumentWithPlik(@Valid @ModelAttribute(ATTR_DOKUMENT_DTO) DokumentDto dokumentDto,
                                       BindingResult result,
                                       @RequestParam(required = false) MultipartFile file) {
         if(result.hasErrors()){
-            return "dokumenty/dodaj";
+            return REDIRECT_ADD_DOKUMENT;
         }
         try {
             Dokument dokument = new Dokument();
@@ -88,7 +100,7 @@ public class DokumentController {
                     extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
                 }
                 String storageFileName = currentTime + extension;
-                String uploadDir = "storage/dokumenty/";
+                String uploadDir = STORAGE_DOKUMENTY_DIR;
                 Path uploadPath = Paths.get(uploadDir);
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
@@ -104,17 +116,19 @@ public class DokumentController {
                 dokument.getPliki().add(plik);
                 dokumentyRepo.save(dokument);
             }
-        } catch(Exception ex){
-            ex.printStackTrace();
+        } catch (StorageException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new ControllerOperationException("Nie udało się dodać dokumentu", ex);
         }
-        return "redirect:/dokumenty";
+        return REDIRECT_DOKUMENTY;
     }
 
     @GetMapping("/edytuj")
     public String editDokument(@RequestParam int id, Model model) {
         Dokument dokument = dokumentyRepo.findById(id).orElse(null);
         if (dokument == null) {
-            return "redirect:/dokumenty";
+            return REDIRECT_DOKUMENTY;
         }
 
         DokumentDto dokumentDto = new DokumentDto();
@@ -124,9 +138,9 @@ public class DokumentController {
         dokumentDto.setStatus(dokument.getStatus());
         dokumentDto.setDataDodania(dokument.getDataDodania());
 
-        model.addAttribute("dokument", dokument);
-        model.addAttribute("dokumentDto", dokumentDto);
-        model.addAttribute("pliki", dokument.getPliki());
+        model.addAttribute(ATTR_DOKUMENT, dokument);
+        model.addAttribute(ATTR_DOKUMENT_DTO, dokumentDto);
+        model.addAttribute(ATTR_PLIKI, dokument.getPliki());
 
         return "dokumenty/edytuj";
     }
@@ -134,22 +148,22 @@ public class DokumentController {
     @PostMapping("/edytuj")
     public String updateDokument(Model model,
                                  @RequestParam int id,
-                                 @Valid @ModelAttribute("dokumentDto") DokumentDto dokumentDto,
+                                 @Valid @ModelAttribute(ATTR_DOKUMENT_DTO) DokumentDto dokumentDto,
                                  BindingResult result,
                                  @RequestParam(required = false) MultipartFile file) {
         if (result.hasErrors()) {
             Dokument dok = dokumentyRepo.findById(id).orElse(null);
             if (dok != null) {
-                model.addAttribute("pliki", dok.getPliki());
+                model.addAttribute(ATTR_PLIKI, dok.getPliki());
             } else {
-                model.addAttribute("pliki", Collections.emptyList());
+                model.addAttribute(ATTR_PLIKI, Collections.emptyList());
             }
-            return "redirect:/dokumenty/edytuj?id=" + id;
+            return REDIRECT_EDIT_DOKUMENT + id;
         }
 
         Dokument dokument = dokumentyRepo.findById(id).orElse(null);
         if (dokument == null) {
-            return "redirect:/dokumenty/edytuj?id=" + id;
+            return REDIRECT_EDIT_DOKUMENT + id;
         }
         try {
             dokument.setNazwaDokumentu(dokumentDto.getNazwaDokumentu());
@@ -160,9 +174,9 @@ public class DokumentController {
 
             dokumentyRepo.save(dokument);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new ControllerOperationException("Nie udało się zaktualizować dokumentu", ex);
         }
-        return "redirect:/dokumenty";
+        return REDIRECT_DOKUMENTY;
     }
 
     @PostMapping("/edytuj/dodajPlik")
@@ -170,11 +184,11 @@ public class DokumentController {
                                     @RequestParam MultipartFile file) {
         try {
             if (file == null || file.isEmpty()) {
-                return "redirect:/dokumenty/edytuj?id=" + id;
+                return REDIRECT_EDIT_DOKUMENT + id;
             }
             Dokument dokument = dokumentyRepo.findById(id).orElse(null);
             if (dokument == null) {
-                return "redirect:/dokumenty/";
+                return REDIRECT_DOKUMENTY;
             }
 
             long currentTime = System.currentTimeMillis();
@@ -184,7 +198,7 @@ public class DokumentController {
                 extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
             }
             String storageFileName = currentTime + extension;
-            String uploadDir = "storage/dokumenty/";
+            String uploadDir = STORAGE_DOKUMENTY_DIR;
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
@@ -201,10 +215,12 @@ public class DokumentController {
 
             dokument.getPliki().add(plik);
             dokumentyRepo.save(dokument);
+        } catch (StorageException ex) {
+            throw ex;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new ControllerOperationException("Nie udało się dodać pliku do dokumentu", ex);
         }
-        return "redirect:/dokumenty/edytuj?id=" + id;
+        return REDIRECT_EDIT_DOKUMENT + id;
     }
 
     @GetMapping("/pobierzPlik")
@@ -214,7 +230,7 @@ public class DokumentController {
             if (plik == null) {
                 return ResponseEntity.notFound().build();
             }
-            File file = new File("storage/dokumenty/" + plik.getNazwaPliku());
+            File file = new File(STORAGE_DOKUMENTY_DIR, plik.getNazwaPliku());
             if (!file.exists()) {
                 return ResponseEntity.notFound().build();
             }
@@ -225,9 +241,8 @@ public class DokumentController {
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new ControllerOperationException("Nie udało się pobrać pliku", ex);
         }
-        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/usunPlik")
@@ -235,37 +250,53 @@ public class DokumentController {
         try {
             Plik plik = plikiRepo.findById(fileId).orElse(null);
             if (plik != null) {
-                Path filePath = Paths.get("storage/dokumenty/" + plik.getNazwaPliku());
+                Path filePath = Paths.get(STORAGE_DOKUMENTY_DIR)
+                        .resolve(plik.getNazwaPliku());
                 Files.deleteIfExists(filePath);
                 plikiRepo.delete(plik);
             }
+        } catch (StorageException ex) {
+            throw ex;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new ControllerOperationException("Nie udało się usunąć pliku", ex);
         }
-        return "redirect:/dokumenty/edytuj?id=" + documentId;
+        return REDIRECT_EDIT_DOKUMENT + documentId;
     }
 
     @GetMapping("/usun")
     public String deleteDokument(@RequestParam("id") int dokumentId) {
         try {
-            Dokument dokument = dokumentyRepo.findById(dokumentId).orElse(null);
-            if (dokument == null) {
-                return "redirect:/dokumenty";
-            }
-            if (dokument.getPliki() != null) {
-                for (Plik plik : dokument.getPliki()) {
-                    try {
-                        Path filePath = Paths.get("storage/dokumenty/" + plik.getNazwaPliku());
-                        Files.deleteIfExists(filePath);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }
+            Dokument dokument = dokumentyRepo.findById(dokumentId)
+                    .orElseThrow(() -> new ControllerOperationException(
+                            "Nie znaleziono dokumentu o id=" + dokumentId));
+
+            deleteAssociatedFiles(dokument);
             dokumentyRepo.delete(dokument);
+
+        } catch (StorageException ex) {
+            throw ex;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new ControllerOperationException("Nie udało się usunąć dokumentu", ex);
         }
-        return "redirect:/dokumenty";
+        return REDIRECT_DOKUMENTY;
+    }
+
+    private void deleteAssociatedFiles(Dokument dokument) {
+        if (dokument.getPliki() == null) {
+            return;
+        }
+        for (Plik plik : dokument.getPliki()) {
+            deleteFile(plik.getNazwaPliku());
+        }
+    }
+
+    private void deleteFile(String fileName) {
+        try {
+            Path filePath = Paths.get(STORAGE_DOKUMENTY_DIR)
+                    .resolve(fileName);
+            Files.deleteIfExists(filePath);
+        } catch (IOException ex) {
+            throw new StorageException("Nie udało się usunąć pliku: " + fileName, ex);
+        }
     }
 }

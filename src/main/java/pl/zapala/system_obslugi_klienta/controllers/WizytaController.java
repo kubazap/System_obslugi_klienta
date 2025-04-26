@@ -1,7 +1,8 @@
 package pl.zapala.system_obslugi_klienta.controllers;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -18,12 +19,26 @@ import pl.zapala.system_obslugi_klienta.repositories.KlientRepository;
 @Controller
 @RequestMapping("/wizyty")
 public class WizytaController {
-    @Autowired
-    private WizytaRepository wizytyRepo;
-    @Autowired
-    private KlientRepository klientRepo;
-    @Autowired
-    private PracownikRepository pracownikRepo;
+    private static final Logger logger = LoggerFactory.getLogger(WizytaController.class);
+
+    private static final String REDIRECT_WIZYTY = "redirect:/wizyty";
+    private static final String REDIRECT_EDIT_WIZYTA = "wizyty/edytuj";
+    private static final String REDIRECT_ADD_WIZYTA = "wizyty/dodaj";
+    private static final String ATTR_KLIENCI = "klienci";
+    private static final String ATTR_WIZYTA = "wizyta";
+    private static final String ATTR_WIZYTA_DTO = "wizytaDto";
+
+    private final WizytaRepository wizytyRepo;
+    private final KlientRepository klientRepo;
+    private final PracownikRepository pracownikRepo;
+
+    public WizytaController(WizytaRepository wizytyRepo,
+                            KlientRepository klientRepo,
+                            PracownikRepository pracownikRepo) {
+        this.wizytyRepo   = wizytyRepo;
+        this.klientRepo   = klientRepo;
+        this.pracownikRepo = pracownikRepo;
+    }
 
     @ModelAttribute
     public void loggedPracownik(Model model) {
@@ -51,18 +66,19 @@ public class WizytaController {
 
         WizytaDto wizytaDto = new WizytaDto();
 
-        model.addAttribute("klienci", klienci);
-        model.addAttribute("wizytaDto", wizytaDto);
+        model.addAttribute(ATTR_KLIENCI, klienci);
+        model.addAttribute(ATTR_WIZYTA_DTO, wizytaDto);
 
-        return "wizyty/dodaj";
+        return REDIRECT_ADD_WIZYTA;
     }
 
     @PostMapping("/dodaj")
     public String createWizyta(@Valid @ModelAttribute WizytaDto wizytaDto, BindingResult result) {
 
-        if(result.hasErrors()) {
-            result.getAllErrors().forEach(err -> System.out.println(err.toString()));
-            return "wizyty/dodaj";
+        if (result.hasErrors()) {
+            result.getAllErrors()
+                    .forEach(err -> logger.warn("Błąd walidacji: {}", err.toString()));
+            return REDIRECT_ADD_WIZYTA;
         }
 
         Wizyta wizyta = new Wizyta();
@@ -83,7 +99,7 @@ public class WizytaController {
 
         wizytyRepo.save(wizyta);
 
-        return "redirect:/wizyty";
+        return REDIRECT_WIZYTY;
     }
 
     @GetMapping("/edytuj")
@@ -91,7 +107,7 @@ public class WizytaController {
 
         Wizyta wizyta = wizytyRepo.findById(id).orElse(null);
         if (wizyta == null) {
-            return "redirect:/wizyty";
+            return REDIRECT_WIZYTY;
         }
 
         var klienci = klientRepo.findAll();
@@ -109,11 +125,11 @@ public class WizytaController {
             wizytaDto.setKlientId(wizyta.getKlient().getId());
         }
 
-        model.addAttribute("klienci", klienci);
-        model.addAttribute("wizyta", wizyta);
-        model.addAttribute("wizytaDto", wizytaDto);
+        model.addAttribute(ATTR_KLIENCI, klienci);
+        model.addAttribute(ATTR_WIZYTA, wizyta);
+        model.addAttribute(ATTR_WIZYTA_DTO, wizytaDto);
 
-        return "wizyty/edytuj";
+        return REDIRECT_EDIT_WIZYTA;
     }
 
     @PostMapping("/edytuj")
@@ -121,15 +137,15 @@ public class WizytaController {
 
         Wizyta wizyta = wizytyRepo.findById(id).orElse(null);
         if (wizyta == null) {
-            return "redirect:/wizyty";
+            return REDIRECT_WIZYTY;
         }
 
         if (result.hasErrors()) {
             var klienci = klientRepo.findAll();
-            model.addAttribute("klienci", klienci);
-            model.addAttribute("wizyta", wizyta);
+            model.addAttribute(ATTR_KLIENCI, klienci);
+            model.addAttribute(ATTR_WIZYTA, wizyta);
 
-            return "wizyty/edytuj";
+            return REDIRECT_EDIT_WIZYTA;
         }
 
         wizyta.setDataWizyty(wizytaDto.getDataWizyty());
@@ -149,7 +165,7 @@ public class WizytaController {
 
         wizytyRepo.save(wizyta);
 
-        return "redirect:/wizyty";
+        return REDIRECT_WIZYTY;
     }
 
     @GetMapping("/usun")
@@ -161,6 +177,6 @@ public class WizytaController {
             wizytyRepo.delete(wizyta);
         }
 
-        return "redirect:/wizyty";
+        return REDIRECT_WIZYTY;
     }
 }

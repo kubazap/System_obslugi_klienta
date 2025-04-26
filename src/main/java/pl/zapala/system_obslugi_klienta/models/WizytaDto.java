@@ -1,8 +1,6 @@
 package pl.zapala.system_obslugi_klienta.models;
 
-import jakarta.persistence.ForeignKey;
 import jakarta.validation.constraints.*;
-
 import java.sql.Date;
 
 public class WizytaDto {

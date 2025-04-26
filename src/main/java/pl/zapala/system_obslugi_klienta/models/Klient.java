@@ -15,7 +15,7 @@ public class Klient {
     private String nazwisko;
     private Date dataUrodzenia;
     private String ulicaNumerDomu;
-    private String Miejscowosc;
+    private String miejscowosc;
     private String kodPocztowy;
     private String numerTelefonu;
     private String email;
@@ -60,10 +60,10 @@ public class Klient {
         this.ulicaNumerDomu = ulicaNumerDomu;
     }
     public String getMiejscowosc() {
-        return Miejscowosc;
+        return miejscowosc;
     }
     public void setMiejscowosc(String miejscowosc) {
-        Miejscowosc = miejscowosc;
+        this.miejscowosc = miejscowosc;
     }
     public String getKodPocztowy() {
         return kodPocztowy;
