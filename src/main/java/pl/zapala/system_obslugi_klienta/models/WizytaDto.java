@@ -1,12 +1,17 @@
 package pl.zapala.system_obslugi_klienta.models;
 
 import jakarta.validation.constraints.*;
+import pl.zapala.system_obslugi_klienta.validators.ValidTime;
+import pl.zapala.system_obslugi_klienta.validators.ValidVisitDate;
+
 import java.sql.Date;
 
 public class WizytaDto {
     @NotNull(message= "Pole daty wizyty jest wymagane.")
+    @ValidVisitDate
     private Date dataWizyty;
     @NotEmpty(message= "Pole godziny jest wymagane.")
+    @ValidTime
     private String godzina;
     @NotEmpty(message= "Pole pokoju jest wymagane.")
     private String pokoj;

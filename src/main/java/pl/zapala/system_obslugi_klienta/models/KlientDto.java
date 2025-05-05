@@ -1,25 +1,35 @@
 package pl.zapala.system_obslugi_klienta.models;
 
 import jakarta.validation.constraints.*;
-
 import java.sql.Date;
+
+import pl.zapala.system_obslugi_klienta.validators.ValidBirthDate;
+import pl.zapala.system_obslugi_klienta.validators.ValidEmail;
+import pl.zapala.system_obslugi_klienta.validators.ValidName;
+import pl.zapala.system_obslugi_klienta.validators.ValidPostal;
 
 public class KlientDto {
     @NotEmpty(message= "Pole imię jest wymagane.")
+    @ValidName
     private String imie;
     @NotEmpty(message= "Pole nazwisko jest wymagane.")
+    @ValidName
     private String nazwisko;
     @Past
     @NotNull(message= "Pole daty urodzin jest wymagane.")
+    @ValidBirthDate
     private Date dataUrodzenia;
     @NotEmpty(message= "Pole ulicy i numeru domu jest wymagane.")
     private String ulicaNumerDomu;
     @NotEmpty(message= "Pole miejscowości jest wymagane.")
+    @ValidName
     private String miejscowosc;
     @NotEmpty(message= "Pole kodu pocztowego jest wymagane. Poprawny format kodu: XX-XXX.")
+    @ValidPostal
     private String kodPocztowy;
     private String numerTelefonu;
     @Email
+    //@ValidEmail
     private String email;
 
     public String getImie() {
