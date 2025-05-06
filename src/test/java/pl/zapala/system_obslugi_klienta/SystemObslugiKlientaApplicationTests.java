@@ -20,6 +20,7 @@ class SystemObslugiKlientaApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Ten test sprawdza jedynie, że Spring ApplicationContext startuje poprawnie.
 	}
 
 }

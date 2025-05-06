@@ -1,6 +1,6 @@
-package pl.zapala.system_obslugi_klienta.dto;
+package pl.zapala.system_obslugi_klienta.models;
 
-public class MessageDTO {
+public class MessageDto {
     private Long id;
     private Integer senderId;
     private String senderFirstName; // Dodane pole

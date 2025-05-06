@@ -1,14 +1,14 @@
-package pl.zapala.system_obslugi_klienta.dto;
+package pl.zapala.system_obslugi_klienta.models;
 
-public class PracownikDTO {
+public class PracownikDto {
     private Integer id;
     private String imie;
     private String nazwisko;
 
-    public PracownikDTO() {
+    public PracownikDto() {
     }
 
-    public PracownikDTO(Integer id, String imie, String nazwisko) {
+    public PracownikDto(Integer id, String imie, String nazwisko) {
         this.id = id;
         this.imie = imie;
         this.nazwisko = nazwisko;

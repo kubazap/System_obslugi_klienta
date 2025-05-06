@@ -4,7 +4,6 @@ import jakarta.validation.constraints.*;
 import java.sql.Date;
 
 import pl.zapala.system_obslugi_klienta.validators.ValidBirthDate;
-import pl.zapala.system_obslugi_klienta.validators.ValidEmail;
 import pl.zapala.system_obslugi_klienta.validators.ValidName;
 import pl.zapala.system_obslugi_klienta.validators.ValidPostal;
 
