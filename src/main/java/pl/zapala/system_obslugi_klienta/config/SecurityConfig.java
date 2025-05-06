@@ -9,6 +9,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.http.HttpMethod;
 import pl.zapala.system_obslugi_klienta.security.MfaCompletionFilter;
 import pl.zapala.system_obslugi_klienta.security.MfaSuccessHandler;
 
@@ -26,6 +28,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/", "/login", "/login/authenticate",
                                 "/css/**", "/js/**", "/img/**", "/vendor/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/messages").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/messages/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(f -> f
                         .loginPage("/login")
