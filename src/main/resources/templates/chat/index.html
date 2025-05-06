@@ -1,207 +1,903 @@
 <!DOCTYPE html>
+
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
 
-    <title>Wiadomości</title>
+<meta charset="utf-8">
 
-    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
-          rel="stylesheet">
-    <link rel="icon"
-          type="image/png"
-          th:href="@{/img/favicon.png}" sizes="32x32" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <!-- CSS -->
-    <link th:href="@{/css/style.css}" rel="stylesheet">
-    <link th:href="@{/vendor/datatables/dataTables.bootstrap4.min.css}" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="description" content="">
+
+<meta name="author" content="">
+
+
+
+<meta name="_csrf" th:content="${_csrf.token}"/>
+
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+
+
+<title>Wiadomości</title>
+
+
+
+<link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+
+rel="stylesheet">
+
+<link rel="icon"
+
+type="image/png"
+
+th:href="@{/img/favicon.png}" sizes="32x32"/>
+
+
+
+<link th:href="@{/css/style.css}" rel="stylesheet">
+
+<link th:href="@{/vendor/datatables/dataTables.bootstrap4.min.css}" rel="stylesheet">
+
+<style>
+
+.conversation-item:hover {
+
+background-color: #f8f9fa;
+
+cursor: pointer;
+
+}
+
+
+
+.message-item {
+
+margin-bottom: 0.5rem;
+
+padding: 0.5rem;
+
+border-radius: 0.5rem;
+
+clear: both;
+
+}
+
+
+
+.message-item.sent {
+
+background-color: #a5d6a7;
+
+text-align: right;
+
+float: right;
+
+}
+
+
+
+.message-item.received {
+
+background-color: #f0f0f0;
+
+text-align: left;
+
+float: left;
+
+}
+
+
+
+#receiverIdMessage {
+
+display: none;
+
+}
+
+</style>
+
 </head>
 
-<body id="page-top">
-<!-- Page Wrapper -->
+
+
+<body id="page-top" th:attr="data-sender-id=${pracownik.id}">
+
 <div id="wrapper">
 
-    <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-        <!-- Sidebar - Logo -->
-        <a class="d-flex align-items-center justify-content-center" th:href="@{/index}">
-            <img class="img-logo" th:src="@{/img/system-call-center.png}" alt="Logo">
-        </a>
 
-        <!-- Divider -->
-        <hr class="sidebar-divider my-0">
-
-        <!-- Nav Item - Wizyty -->
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/wizyty}">
-                <i class="fas fa-fw fa-calendar-week"></i>
-                <span class="ml-1">Wizyty</span>
-            </a>
-        </li>
-
-        <!-- Nav Item - Klienci -->
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/klienci}">
-                <i class="fas fa-fw fa-users"></i>
-                <span class="ml-1">Klienci</span>
-            </a>
-        </li>
-
-        <!-- Nav Item - Dokumenty -->
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/dokumenty}">
-                <i class="fas fa-fw fa-file"></i>
-                <span class="ml-1">Dokumenty</span>
-            </a>
-        </li>
-
-        <!-- Nav Item - Wiadomości (aktywne) -->
-        <li class="nav-item active">
-            <a class="nav-link" th:href="@{/chat}">
-                <i class="fas fa-fw fa-inbox"></i>
-                <span class="ml-1">Wiadomości</span>
-            </a>
-        </li>
-
-        <!-- Divider -->
-        <hr class="sidebar-divider d-none d-md-block">
-    </ul>
-    <!-- End of Sidebar -->
-
-    <!-- Content Wrapper -->
-    <div id="content-wrapper" class="d-flex flex-column">
-
-        <!-- Main Content -->
-        <div id="content">
-
-            <!-- Topbar -->
-            <nav class="navbar navbar-expand navbar-light topbar mb-4 mt-2 static-top">
-
-                <!-- Page Heading -->
-                <h1 class="h2 ml-3 mt-2 font-weight-bold">WIADOMOŚCI</h1>
-
-                <!-- Topbar Navbar -->
-                <ul class="navbar-nav ml-auto">
-
-                    <!-- Nav Item - Powiadomienia -->
-                    <li class="nav-item dropdown no-arrow mx-1">
-                        <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-bell fa-fw text-gray-700"></i>
-                            <!-- Counter - Powiadomienia -->
-                            <span class="badge badge-danger badge-counter">2+</span>
-                        </a>
-                        <!-- Dropdown - Powiadomienia -->
-                        <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                             aria-labelledby="alertsDropdown">
-                            <h6 class="dropdown-header">
-                                Powiadomienia
-                            </h6>
-                            <a class="dropdown-item d-flex align-items-center" href="#">
-                                <div class="mr-3">
-                                    <div class="icon-circle bg-primary">
-                                        <i class="fas fa-file-alt text-white"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="small text-gray-500">Kwiecień 12, 2025</div>
-                                    <span class="font-weight-bold">Nowy raport miesięczny jest gotowy do pobrania. </span>
-                                </div>
-                            </a>
-                            <a class="dropdown-item d-flex align-items-center" href="#">
-                                <div class="mr-3">
-                                    <div class="icon-circle bg-success">
-                                        <i class="fas fa-donate text-white"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="small text-gray-500">Kwiecień 1, 2025</div>
-                                    Uzyskane zyski w poprzednim miesiącu: 21 370 zł.
-                                </div>
-                            </a>
-                            <a class="dropdown-item text-center small text-gray-500" href="#">Wszystkie powiadomienia</a>
-                        </div>
-                    </li>
-
-                    <!-- Nav Item - Użytkownik -->
-                    <li class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="ml-1 d-none d-lg-inline text-gray-700 figure-caption"
-                                  th:text="${pracownik.imie} + ' ' + ${pracownik.nazwisko}"></span>
-                            <img class="img-profile rounded-circle" th:src="@{/img/undraw_profile.svg}">
-                        </a>
-                        <!-- Dropdown - Użytkownik -->
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                             aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                Wyloguj się
-                            </a>
-                        </div>
-                    </li>
-
-                </ul>
-
-            </nav>
-            <!-- End of Topbar -->
-
-            <!-- Begin Page Content -->
-            <div class="container-fluid">
-
-                <!-- Messages -->
-                <div class="card shadow mb-4">
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
 
 
-                </div>
+<a class="d-flex align-items-center justify-content-center" th:href="@{/index}">
 
-            </div>
-            <!-- End of Page Content -->
+<img class="img-logo" th:src="@{/img/system-call-center.png}" alt="Logo">
 
-        </div>
-        <!-- End of Main Content -->
+</a>
 
-    </div>
-    <!-- End of Content Wrapper -->
+
+
+<hr class="sidebar-divider my-0">
+
+
+
+<li class="nav-item">
+
+<a class="nav-link" th:href="@{/wizyty}">
+
+<i class="fas fa-fw fa-calendar-week"></i>
+
+<span class="ml-1">Wizyty</span>
+
+</a>
+
+</li>
+
+
+
+<li class="nav-item">
+
+<a class="nav-link" th:href="@{/klienci}">
+
+<i class="fas fa-fw fa-users"></i>
+
+<span class="ml-1">Klienci</span>
+
+</a>
+
+</li>
+
+
+
+<li class="nav-item">
+
+<a class="nav-link" th:href="@{/dokumenty}">
+
+<i class="fas fa-fw fa-file"></i>
+
+<span class="ml-1">Dokumenty</span>
+
+</a>
+
+</li>
+
+
+
+<li class="nav-item active">
+
+<a class="nav-link" th:href="@{/chat}">
+
+<i class="fas fa-fw fa-inbox"></i>
+
+<span class="ml-1">Wiadomości</span>
+
+</a>
+
+</li>
+
+
+
+<hr class="sidebar-divider d-none d-md-block">
+
+</ul>
+
+<div id="content-wrapper" class="d-flex flex-column">
+
+
+
+<div id="content">
+
+
+
+<nav class="navbar navbar-expand navbar-light topbar mb-4 mt-2 static-top">
+
+
+
+<h1 class="h2 ml-3 mt-2 font-weight-bold">WIADOMOŚCI</h1>
+
+
+
+<ul class="navbar-nav ml-auto">
+
+
+
+<li class="nav-item dropdown no-arrow mx-1">
+
+<a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+
+data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+<i class="fas fa-bell fa-fw text-gray-700"></i>
+
+<span class="badge badge-danger badge-counter">2+</span>
+
+</a>
+
+<div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+
+aria-labelledby="alertsDropdown">
+
+<h6 class="dropdown-header">
+
+Powiadomienia
+
+</h6>
+
+<a class="dropdown-item d-flex align-items-center" href="#">
+
+<div class="mr-3">
+
+<div class="icon-circle bg-primary">
+
+<i class="fas fa-file-alt text-white"></i>
 
 </div>
-<!-- End of Page Wrapper -->
 
-<!-- Logout Modal-->
+</div>
+
+<div>
+
+<div class="small text-gray-500">Kwiecień 12, 2025</div>
+
+<span class="font-weight-bold">Nowy raport miesięczny jest gotowy do pobrania. </span>
+
+</div>
+
+</a>
+
+<a class="dropdown-item d-flex align-items-center" href="#">
+
+<div class="mr-3">
+
+<div class="icon-circle bg-success">
+
+<i class="fas fa-donate text-white"></i>
+
+</div>
+
+</div>
+
+<div>
+
+<div class="small text-gray-500">Kwiecień 1, 2025</div>
+
+Uzyskane zyski w poprzednim miesiącu: 21 370 zł.
+
+</div>
+
+</a>
+
+<a class="dropdown-item text-center small text-gray-500" href="#">Wszystkie powiadomienia</a>
+
+</div>
+
+</li>
+
+
+
+<li class="nav-item dropdown no-arrow">
+
+<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+
+data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+<span class="ml-1 d-none d-lg-inline text-gray-700 figure-caption"
+
+th:text="${pracownik.imie} + ' ' + ${pracownik.nazwisko}"></span>
+
+<img class="img-profile rounded-circle" th:src="@{/img/undraw_profile.svg}">
+
+</a>
+
+<div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+
+aria-labelledby="userDropdown">
+
+<a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+
+<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+
+Wyloguj się
+
+</a>
+
+</div>
+
+</li>
+
+
+
+</ul>
+
+
+
+</nav>
+
+<div class="container-fluid">
+
+
+
+<div class="card shadow mb-4">
+
+<div class="card-header py-3">
+
+<h6 class="m-0 font-weight-bold text-primary">
+
+Wyślij nową wiadomość:
+
+</h6>
+
+</div>
+
+<div class="card-body">
+
+<form id="sendMessageForm">
+
+<div class="form-group">
+
+<label for="receiverSelect">Wybierz odbiorcę:</label>
+
+<select class="form-control" id="receiverSelect" required>
+
+<option value="" disabled selected>Wybierz użytkownika</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label for="messageContent">Treść wiadomości:</label>
+
+<textarea class="form-control" id="messageContent" rows="3" required></textarea>
+
+</div>
+
+<button type="button" class="btn btn-primary" onclick="sendMessage()">Wyślij</button>
+
+<div id="sendMessageResult" class="mt-2"></div>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<div class="card shadow mb-4">
+
+<div class="card-header py-3">
+
+<h6 class="m-0 font-weight-bold text-primary">Konwersacje</h6>
+
+</div>
+
+<div class="card-body" id="conversationList">
+
+Ładowanie konwersacji...
+
+</div>
+
+</div>
+
+
+
+<div class="card shadow mb-4" id="conversationDetails" style="display:none;">
+
+<div class="card-header py-3">
+
+<h6 class="m-0 font-weight-bold text-primary">Wiadomości z <span id=" собеседникИмя"></span> <span id=" rozmowcaNazwisko"></span> (<span id="receiverIdMessage" style="display:none;"></span>)</h6>
+
+</div>
+
+<div class="card-body" id="conversationMessages">
+
+</div>
+
+<div class="card-footer">
+
+<div class="input-group">
+
+<textarea id="newMessage" class="form-control" placeholder="Wpisz wiadomość..." rows="3"></textarea>
+
+<div class="input-group-append">
+
+<button class="btn btn-primary" type="button" onclick="sendNewMessage()">Wyślij</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Chcesz się wylogować?</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">Wybierz „Wyloguj się” poniżej, jeśli chcesz zakończyć bieżącą sesję.</div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Anuluj</button>
-                <a class="btn btn-primary" th:href="@{/login?logout}">Wyloguj się</a>
-            </div>
-        </div>
-    </div>
+
+aria-hidden="true">
+
+<div class="modal-dialog" role="document">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5 class="modal-title" id="exampleModalLabel">Chcesz się wylogować?</h5>
+
+<button class="close" type="button" data-dismiss="modal" aria-label="Close">
+
+<span aria-hidden="true">×</span>
+
+</button>
+
 </div>
+
+<div class="modal-body">Wybierz „Wyloguj się” poniżej, jeśli chcesz zakończyć bieżącą sesję.</div>
+
+<div class="modal-footer">
+
+<button class="btn btn-secondary" type="button" data-dismiss="modal">Anuluj</button>
+
+<a class="btn btn-primary" th:href="@{/login?logout}">Wyloguj się</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
 
 <div id="preloader"></div>
 
-<!-- JS -->
+
+
 <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+
 <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
 <script th:src="@{/vendor/datatables/jquery.dataTables.min.js}"></script>
+
 <script th:src="@{/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
+
 <script th:src="@{/js/demo/datatables-demo.js}"></script>
+
 <script th:src="@{/js/main.js}"></script>
 
+
+
+<script>
+
+function sendMessage() {
+
+const senderId = document.querySelector('body').dataset.senderId;
+
+const receiverSelectElement = document.getElementById('receiverSelect');
+
+const receiverId = receiverSelectElement.value;
+
+const messageContentInput = document.getElementById('messageContent');
+
+const content = messageContentInput.value;
+
+const sendMessageResultDiv = document.getElementById('sendMessageResult');
+
+
+
+if (!receiverId) {
+
+alert('Proszę wybrać odbiorcę wiadomości.');
+
+return;
+
+}
+
+
+
+const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+
+
+fetch('/messages', {
+
+method: 'POST',
+
+headers: {
+
+'Content-Type': 'application/json',
+
+[csrfHeader]: csrfToken
+
+},
+
+body: JSON.stringify({senderId: parseInt(senderId), receiverId: parseInt(receiverId), content: content})
+
+})
+
+.then(response => response.json())
+
+.then(data => {
+
+sendMessageResultDiv.innerText = 'Wiadomość wysłana. ID wiadomości: ' + data.id;
+
+document.getElementById('sendMessageForm').reset();
+
+loadConversations(senderId);
+
+})
+
+.catch(error => {
+
+sendMessageResultDiv.innerText = 'Wystąpił błąd podczas wysyłania wiadomości: ' + error;
+
+});
+
+}
+
+
+
+function loadConversations(userId) {
+
+const conversationListElement = document.getElementById('conversationList');
+
+conversationListElement.innerHTML = 'Ładowanie konwersacji...';
+
+
+
+fetch(`/messages/conversations/${userId}`)
+
+.then(response => response.json())
+
+.then(conversations => {
+
+conversationListElement.innerHTML = '';
+
+if (conversations && conversations.length > 0) {
+
+conversations.forEach(conversation => {
+
+const conversationDiv = document.createElement('div');
+
+conversationDiv.classList.add('conversation-item', 'p-3', 'mb-2', 'border', 'rounded', 'cursor-pointer');
+
+conversationDiv.dataset. собеседникId = conversation.rozmowcaId;
+
+conversationDiv.addEventListener('click', () => showConversation(userId, conversation.rozmowcaId, conversation.rozmowcaImie, conversation.rozmowcaNazwisko));
+
+
+
+const icon = getRandomIcon();
+
+conversationDiv.innerHTML =
+
+'<div class="d-flex align-items-center">' +
+
+' <div class="mr-3">' + icon + '</div>' +
+
+' <div>' +
+
+' <h6 class="mb-0">' + conversation.rozmowcaImie + ' ' + conversation.rozmowcaNazwisko + '</h6>' +
+
+' <small class="text-muted">' + (conversation.ostatniaWiadomoscTresc ? conversation.ostatniaWiadomoscTresc : 'Brak wiadomości') + '</small>' +
+
+' </div>' +
+
+'</div>';
+
+conversationListElement.appendChild(conversationDiv);
+
+});
+
+} else {
+
+conversationListElement.innerText = 'Brak konwersacji.';
+
+}
+
+})
+
+.catch(error => {
+
+conversationListElement.innerText = 'Wystąpił błąd podczas ładowania konwersacji: ' + error;
+
+});
+
+}
+
+
+
+function loadUsersForMessage(currentUserId) {
+
+const receiverSelectElement = document.getElementById('receiverSelect');
+
+const existingValues = new Set();
+
+
+
+fetch('/messages/users')
+
+.then(response => response.json())
+
+.then(users => {
+
+users.forEach(user => {
+
+if (user.id !== currentUserId && !existingValues.has(user.id)) {
+
+const option = document.createElement('option');
+
+option.value = user.id;
+
+option.innerText = `${user.imie} ${user.nazwisko}`;
+
+receiverSelectElement.appendChild(option);
+
+existingValues.add(user.id);
+
+}
+
+});
+
+})
+
+.catch(error => {
+
+console.error('Błąd podczas ładowania listy użytkowników:', error);
+
+});
+
+}
+
+
+
+function sendNewMessage() {
+
+const senderId = document.querySelector('body').dataset.senderId;
+
+const receiverIdMessageElement = document.getElementById('receiverIdMessage');
+
+const newMessageInput = document.getElementById('newMessage');
+
+const content = newMessageInput.value.trim();
+
+const conversationMessagesElement = document.getElementById('conversationMessages');
+
+
+
+if (!content || !receiverIdMessageElement) {
+
+return;
+
+}
+
+
+
+const receiverId = parseInt(receiverIdMessageElement.innerText, 10);
+
+if (isNaN(receiverId)) {
+
+console.error("Nieprawidłowe ID odbiorcy.");
+
+return;
+
+}
+
+
+
+const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+
+
+fetch('/messages', {
+
+method: 'POST',
+
+headers: {
+
+'Content-Type': 'application/json',
+
+[csrfHeader]: csrfToken
+
+},
+
+body: JSON.stringify({ senderId: parseInt(senderId), receiverId: receiverId, content: content })
+
+})
+
+.then(response => response.json())
+
+.then(newMessage => {
+
+newMessageInput.value = '';
+
+
+
+const now = new Date();
+
+const day = String(now.getDate()).padStart(2, '0');
+
+const month = String(now.getMonth() + 1).padStart(2, '0');
+
+const year = now.getFullYear();
+
+const formattedDate = `${day}.${month}.${year}`;
+
+
+
+const hours = String(now.getHours()).padStart(2, '0');
+
+const minutes = String(now.getMinutes()).padStart(2, '0');
+
+const seconds = String(now.getSeconds()).padStart(2, '0');
+
+const formattedTime = `${hours}:${minutes}:${seconds}`;
+
+
+
+const senderInfo = `<small class="text-muted">${newMessage.senderFirstName} ${newMessage.senderLastName} (${formattedDate}, ${formattedTime})</small><br>`;
+
+const messageDiv = document.createElement('div');
+
+messageDiv.classList.add('message-item', 'p-2', 'mb-1', 'rounded', 'sent');
+
+messageDiv.innerHTML = `${senderInfo}${newMessage.content}`;
+
+conversationMessagesElement.appendChild(messageDiv);
+
+
+
+conversationMessagesElement.scrollTop = conversationMessagesElement.scrollHeight;
+
+
+
+loadConversations(senderId);
+
+})
+
+.catch(error => {
+
+console.error('Błąd podczas wysyłania nowej wiadomości:', error);
+
+});
+
+}
+
+
+
+function showConversation(userId, собеседникId, собеседникИмя, rozmowcaNazwisko) {
+
+const conversationMessagesElement = document.getElementById('conversationMessages');
+
+const conversationDetailsElement = document.getElementById('conversationDetails');
+
+const receiverIdMessageElement = document.getElementById('receiverIdMessage');
+
+document.getElementById(' собеседникИмя').innerText = собеседникИмя;
+
+document.getElementById(' rozmowcaNazwisko').innerText = rozmowcaNazwisko;
+
+receiverIdMessageElement.innerText = собеседникId;
+
+conversationMessagesElement.innerHTML = 'Ładowanie wiadomości...';
+
+conversationDetailsElement.style.display = 'block';
+
+
+
+const currentUserId = parseInt(userId, 10);
+
+
+
+fetch(`/messages/${currentUserId}/${ собеседникId}`)
+
+.then(response => response.json())
+
+.then(messages => {
+
+conversationMessagesElement.innerHTML = '';
+
+if (messages && messages.length > 0) {
+
+const sortedMessages = messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+sortedMessages.forEach(message => {
+
+const messageDiv = document.createElement('div');
+
+messageDiv.classList.add('message-item', 'p-2', 'mb-1', 'rounded');
+
+const formattedDate = new Date(message.timestamp).toLocaleString();
+
+const senderInfo = `<small class="text-muted">${message.senderFirstName} ${message.senderLastName} (${formattedDate})</small><br>`;
+
+
+
+if (message.senderId === currentUserId) {
+
+messageDiv.classList.add('sent');
+
+messageDiv.innerHTML = `${senderInfo}${message.content}`;
+
+} else {
+
+messageDiv.classList.add('received');
+
+messageDiv.innerHTML = `${senderInfo}${message.content}`;
+
+}
+
+conversationMessagesElement.appendChild(messageDiv);
+
+});
+
+conversationMessagesElement.scrollTop = conversationMessagesElement.scrollHeight;
+
+} else {
+
+conversationMessagesElement.innerText = 'Brak wiadomości z tym użytkownikiem.';
+
+}
+
+})
+
+.catch(error => {
+
+conversationMessagesElement.innerText = 'Wystąpił błąd podczas ładowania wiadomości.';
+
+});
+
+}
+
+
+
+function getRandomIcon() {
+
+const icons = ['<i class="fas fa-user fa-2x text-primary"></i>', '<i class="fas fa-user-tie fa-2x text-success"></i>', '<i class="fas fa-user-circle fa-2x text-info"></i>', '<i class="fas fa-id-card fa-2x text-warning"></i>'];
+
+return icons[Math.floor(Math.random() * icons.length)];
+
+}
+
+
+
+$(document).ready(function () {
+
+const initialUserId = document.querySelector('body').dataset.senderId;
+
+loadConversations(initialUserId);
+
+loadUsersForMessage(initialUserId);
+
+});
+
+</script>
+
+
+
 </body>
+
 </html>
