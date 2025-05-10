@@ -15,6 +15,16 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.mail.username=dummy",
+        "spring.mail.password=dummy",
+        "spring.mail.host=localhost",
+        "emails.sender_email=dummy@example.com"})
 public class KlientTest {
 
     private KlientDto klientDto;
