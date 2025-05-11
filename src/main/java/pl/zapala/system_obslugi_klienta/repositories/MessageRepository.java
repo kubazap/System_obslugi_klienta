@@ -18,4 +18,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findBySenderIdOrderBySentAtDesc(Integer senderId);
 
     List<Message> findByReceiverIdOrderBySentAtDesc(Integer receiverId);
+
+    List<Message> findBySenderIdOrReceiverIdOrderBySentAtDesc(Integer userId, Integer userId1);
 }

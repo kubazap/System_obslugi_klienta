@@ -11441,3 +11441,147 @@ footer.sticky-footer .copyright {
 body.sidebar-toggled footer.sticky-footer {
   width: 100%;
 }
+
+.preview {
+  display:block;
+  max-width:220px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-top: 4px;
+}
+
+.time-col {
+    min-width:56px;
+    text-align:right;
+    flex-shrink:0;
+}
+
+.messenger-wrapper {
+  height: 70vh;
+}
+
+#conversationMessages {
+  overflow-y: auto;
+}
+
+.chat-header {
+  border-bottom: 1px solid rgba(0, 0, 0, .05);
+  min-height: 60px;
+  padding: 0 20px;
+}
+
+#chat-input-bar {
+  border-top: 1px solid rgba(0, 0, 0, .05);
+  padding: 16px 24px;
+}
+
+#chat-input-bar textarea {
+  background: #eaf0ff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  padding: 12px 16px;
+  resize: none;
+}
+
+#chat-input-bar textarea:focus {
+  background: #e4ebff;
+  outline: none;
+}
+
+#chat-input-bar .btn-link {
+  font-size: 20px;
+}
+
+#chat-input-bar .btn-primary {
+  align-items: center;
+  border-radius: 50%;
+  display: flex;
+  height: 40px;
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+}
+
+.conversation-item {
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, .05);
+  cursor: pointer;
+  display: flex;
+  padding: 16px 32px 16px 12px;
+  transition: background .2s;
+}
+
+.conversation-item:first-child {
+  padding-top: 6px;
+}
+
+.conversation-item .avatar {
+  align-items: center;
+  background: #2c59a3;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  flex: 0 0 40px;
+  font-size: 14px;
+  height: 40px;
+  justify-content: center;
+  margin-right: 12px;
+  width: 40px;
+}
+
+.name {
+  font-size: 0.9rem;
+}
+
+.message-item {
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.35;
+  margin: 8px 0;
+  max-width: 60%;
+  padding: 12px 16px;
+  position: relative;
+}
+
+.message-item small {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.message-item.sent,
+.sent .message-item {
+  background: #2c59a3;
+  color: #fff;
+  margin-left: auto;
+}
+
+.message-item.received,
+.received .message-item {
+  background: #eaedee;
+  color: #3e454d;
+  margin-right: auto;
+}
+
+.msg-wrap {
+  margin-bottom: 8px;
+  max-width: 60%;
+}
+
+.msg-wrap.sent {
+  margin-left: auto;
+  text-align: right;
+}
+
+.msg-wrap.received {
+  margin-right: auto;
+  text-align: left;
+}
+
+.msg-time {
+  display: block;
+  font-size: 11px;
+  margin: 4px 4px 0 4px;
+}
