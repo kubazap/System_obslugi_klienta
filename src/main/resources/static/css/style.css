@@ -11451,6 +11451,8 @@ body.sidebar-toggled footer.sticky-footer {
   margin-top: 4px;
 }
 
+.preview:empty::after{ content:' '; opacity:.3; }
+
 .time-col {
     min-width:56px;
     text-align:right;

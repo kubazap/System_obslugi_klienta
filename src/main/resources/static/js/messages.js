@@ -115,7 +115,7 @@ function showConversation(myId, partnerId, imie, nazwisko) {
     .then(msgs => {
       box.innerHTML = '';
       if (!msgs.length) {
-        box.textContent = 'Brak wiadomości.';
+        box.textContent = ' ';
         return;
       }
 

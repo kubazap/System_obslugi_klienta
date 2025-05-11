@@ -69,52 +69,55 @@ public class MessageController {
     public ResponseEntity<List<Map<String, Object>>> getConversations(
             @PathVariable Integer userId) {
 
-        /* -------- 1. pobierz wszystkie wiad. danego użytkownika -------- */
+    /* 1.  Pobierz WSZYSTKIE wiadomości, w których użytkownik bierze udział
+           (są już posortowane malejąco po dacie) */
         List<Message> all = messageRepository
                 .findBySenderIdOrReceiverIdOrderBySentAtDesc(userId, userId);
 
-        /* -------- 2. dla każdego partnera zapamiętaj NAJNOWSZĄ ---------- */
-        Map<Integer, Message> last = new HashMap<>();
+        /* 2.  Dla każdego rozmówcy zapamiętaj NAJNOWSZĄ wiadomość */
+        Map<Integer, Message> lastMsg = new HashMap<>();
         for (Message m : all) {
             int partner = Objects.equals(m.getSenderId(), userId)
-                    ? m.getReceiverId() : m.getSenderId();
+                    ? m.getReceiverId()
+                    : m.getSenderId();
 
-            last.compute(partner, (k, old) ->
-                    old == null || m.getSentAt().isAfter(old.getSentAt()) ? m : old);
+            lastMsg.compute(partner,
+                    (k, old) -> old == null || m.getSentAt().isAfter(old.getSentAt()) ? m : old);
         }
 
-        /* -------- 3. przenieś do DTO wszystkich pracowników ------------- */
-        List<Map<String, Object>> dto = pracownikRepository.findAll().stream()
-                .filter(p -> !p.getId().equals(userId))          // pomiń siebie
+        /* 3.  Zbuduj listę DTO dla KAŻDEGO pracownika ≠ userId */
+        List<Map<String, Object>> list = pracownikRepository.findAll().stream()
+                .filter(p -> !p.getId().equals(userId))                // pomiń siebie
                 .map(p -> {
-                    Message msg = last.get(p.getId());           // może być null
-                    Map<String,Object> m = new HashMap<>();
-                    m.put("rozmowcaId",       p.getId());
-                    m.put("rozmowcaImie",     p.getImie());
-                    m.put("rozmowcaNazwisko", p.getNazwisko());
-                    if (msg != null) {
-                        m.put("ostatniaWiadomoscTresc", msg.getContent());
-                        m.put("ostatniaWiadomoscCzas",  msg.getSentAt());
-                    }
-                    return m;
+                    Message m = lastMsg.get(p.getId());                // może być null
+                    Map<String, Object> dto = new HashMap<>();
+                    dto.put("rozmowcaId",       p.getId());
+                    dto.put("rozmowcaImie",     p.getImie());
+                    dto.put("rozmowcaNazwisko", p.getNazwisko());
+                    dto.put("ostatniaWiadomoscTresc", m != null ? m.getContent()   : null);
+                    dto.put("ostatniaWiadomoscCzas",  m != null ? m.getSentAt()    : null);
+                    return dto;
                 })
-                /* -------- 4. sortowanie: z wiadomościami (najnowsza → starsza),
-                             a później alfabetycznie --------------------------- */
-                .sorted((a,b)->{
+                /* 4.  Sortuj:
+                       – najpierw ci z wiadomościami (malejąco po dacie),
+                       – potem bez wiadomości – alfabetycznie „Nazwisko ► Imię” */
+                .sorted((a,b) -> {
                     OffsetDateTime ta = (OffsetDateTime) a.get("ostatniaWiadomoscCzas");
                     OffsetDateTime tb = (OffsetDateTime) b.get("ostatniaWiadomoscCzas");
+
                     if (ta != null && tb != null) return tb.compareTo(ta);   // obie mają
                     if (ta != null) return -1;                               // a ma, b nie
-                    if (tb != null) return 1;                                // b ma, a nie
-                    int ln = ((String)a.get("rozmowcaNazwisko"))
-                            .compareToIgnoreCase((String)b.get("rozmowcaNazwisko"));
+                    if (tb != null) return  1;                               // b ma, a nie
+
+                    int ln = ((String) a.get("rozmowcaNazwisko"))
+                            .compareToIgnoreCase((String) b.get("rozmowcaNazwisko"));
                     return ln != 0 ? ln :
-                            ((String)a.get("rozmowcaImie"))
-                                    .compareToIgnoreCase((String)b.get("rozmowcaImie"));
+                            ((String) a.get("rozmowcaImie"))
+                                    .compareToIgnoreCase((String) b.get("rozmowcaImie"));
                 })
                 .toList();
 
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(list);
     }
 
     @GetMapping("/users")
