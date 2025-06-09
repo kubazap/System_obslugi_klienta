@@ -227,11 +227,13 @@
                                         <button class="btn btn-primary btn-sm mb-3 pl-3 pr-3" type="button" data-toggle="collapse" data-target="#collapseForm" aria-expanded="false">
                                             <i class="fas fa-plus fa-sm text-white-50 mr-1"></i> Dodaj plik
                                         </button>
-                                        <div class="collapse mb-3" id="collapseForm">
+                                        <div class="collapse mb-3" id="collapseForm" th:classappend="${fileError} ? 'show'">
                                             <form method="post" action="/dokumenty/edytuj/dodajPlik" enctype="multipart/form-data">
                                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                                 <input type="hidden" name="id" th:value="${dokument.id}" />
                                                 <input type="file" name="file" class="form-control add-file mb-3" />
+                                                <div th:if="${fileError}"  class="text-danger mt-n2 mb-2"
+                                                     th:text="${fileError}"></div>
                                                 <div class="row">
                                                     <div class="col">
                                                         <button class="btn btn-sm btn-success ml-3 mr-3 pl-3 pr-3" type="submit">Dodaj</button>
