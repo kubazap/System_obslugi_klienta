@@ -12,8 +12,11 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.zapala.system_obslugi_klienta.exception.ControllerOperationException;
 import pl.zapala.system_obslugi_klienta.exception.StorageException;
+import pl.zapala.system_obslugi_klienta.exception.InvalidFileTypeException;
+import pl.zapala.system_obslugi_klienta.exception.VirusFoundException;
 import pl.zapala.system_obslugi_klienta.models.Dokument;
 import pl.zapala.system_obslugi_klienta.models.DokumentDto;
 import pl.zapala.system_obslugi_klienta.models.Plik;
@@ -21,8 +24,10 @@ import pl.zapala.system_obslugi_klienta.models.Pracownik;
 import pl.zapala.system_obslugi_klienta.repositories.DokumentRepository;
 import pl.zapala.system_obslugi_klienta.repositories.PlikRepository;
 import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
+import pl.zapala.system_obslugi_klienta.services.AntivirusService;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.sql.Date;
 import java.util.Collections;
@@ -42,13 +47,16 @@ public class DokumentController {
     private final DokumentRepository dokumentyRepo;
     private final PlikRepository plikiRepo;
     private final PracownikRepository pracownikRepo;
+    private final AntivirusService antivirusService;
 
     public DokumentController(DokumentRepository dokumentyRepo,
                               PlikRepository plikiRepo,
-                              PracownikRepository pracownikRepo) {
-        this.dokumentyRepo  = dokumentyRepo;
-        this.plikiRepo      = plikiRepo;
-        this.pracownikRepo  = pracownikRepo;
+                              PracownikRepository pracownikRepo,
+                              AntivirusService antivirusService) {
+        this.dokumentyRepo    = dokumentyRepo;
+        this.plikiRepo        = plikiRepo;
+        this.pracownikRepo    = pracownikRepo;
+        this.antivirusService = antivirusService;
     }
 
     @ModelAttribute
@@ -77,13 +85,20 @@ public class DokumentController {
     }
 
     @PostMapping("/dodaj")
-    public String addDokumentWithPlik(@Valid @ModelAttribute(ATTR_DOKUMENT_DTO) DokumentDto dokumentDto,
-                                      BindingResult result,
-                                      @RequestParam(required = false) MultipartFile file) {
-        if(result.hasErrors()){
+    public String addDokumentWithPlik(
+            @Valid @ModelAttribute(ATTR_DOKUMENT_DTO) DokumentDto dokumentDto,
+            BindingResult result,
+            @RequestParam(required = false) MultipartFile file, Model model) {
+
+        if (result.hasErrors()) {
             return REDIRECT_ADD_DOKUMENT;
         }
         try {
+            if (file != null && !file.isEmpty()) {
+                validatePdf(file);
+                antivirusService.scan(file.getBytes());
+            }
+
             Dokument dokument = new Dokument();
             dokument.setNazwaDokumentu(dokumentDto.getNazwaDokumentu());
             dokument.setTyp(dokumentDto.getTyp());
@@ -92,33 +107,31 @@ public class DokumentController {
             dokument.setDataDodania(new Date(System.currentTimeMillis()));
             dokumentyRepo.save(dokument);
 
-            if (file != null && !file.isEmpty()){
-                long currentTime = System.currentTimeMillis();
-                String originalFilename = file.getOriginalFilename();
-                String extension = "";
-                if (originalFilename != null && originalFilename.contains(".")) {
-                    extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
-                }
-                String storageFileName = currentTime + extension;
-                String uploadDir = STORAGE_DOKUMENTY_DIR;
-                Path uploadPath = Paths.get(uploadDir);
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
-                try (InputStream inputStream = file.getInputStream()) {
-                    Files.copy(inputStream, uploadPath.resolve(storageFileName),
-                            StandardCopyOption.REPLACE_EXISTING);
-                }
-                Plik plik = new Plik();
-                plik.setDataDodania(new Date(currentTime));
-                plik.setNazwaPliku(storageFileName);
-                plik.setDokument(dokument);
-                dokument.getPliki().add(plik);
-                dokumentyRepo.save(dokument);
+            long currentTime = System.currentTimeMillis();
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
             }
-        } catch (StorageException ex) {
-            throw ex;
-        } catch (Exception ex) {
+            String storageFileName = currentTime + extension;
+
+            Path uploadPath = Paths.get(STORAGE_DOKUMENTY_DIR);
+            Files.createDirectories(uploadPath);
+            try (InputStream is = file.getInputStream()) {
+                Files.copy(is, uploadPath.resolve(storageFileName), StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            Plik plik = new Plik();
+            plik.setDataDodania(new Date(currentTime));
+            plik.setNazwaPliku(storageFileName);
+            plik.setDokument(dokument);
+            dokument.getPliki().add(plik);
+            dokumentyRepo.save(dokument);
+        } catch (InvalidFileTypeException | VirusFoundException ex) {
+            model.addAttribute("fileError", ex.getMessage());
+            return REDIRECT_ADD_DOKUMENT;
+        }
+        catch (Exception ex) {
             throw new ControllerOperationException("Nie udało się dodać dokumentu", ex);
         }
         return REDIRECT_DOKUMENTY;
@@ -181,15 +194,20 @@ public class DokumentController {
 
     @PostMapping("/edytuj/dodajPlik")
     public String addAnotherPlikToDokument(@RequestParam int id,
-                                    @RequestParam MultipartFile file) {
+                                           @RequestParam MultipartFile file,
+                                           RedirectAttributes redirect) {
+
+        if (file == null || file.isEmpty()) {
+            return REDIRECT_EDIT_DOKUMENT + id;
+        }
+        Dokument dokument = dokumentyRepo.findById(id).orElse(null);
+        if (dokument == null) {
+            return REDIRECT_DOKUMENTY;
+        }
+
         try {
-            if (file == null || file.isEmpty()) {
-                return REDIRECT_EDIT_DOKUMENT + id;
-            }
-            Dokument dokument = dokumentyRepo.findById(id).orElse(null);
-            if (dokument == null) {
-                return REDIRECT_DOKUMENTY;
-            }
+            validatePdf(file);
+            antivirusService.scan(file.getBytes());
 
             long currentTime = System.currentTimeMillis();
             String originalFilename = file.getOriginalFilename();
@@ -198,13 +216,11 @@ public class DokumentController {
                 extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
             }
             String storageFileName = currentTime + extension;
-            String uploadDir = STORAGE_DOKUMENTY_DIR;
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-            try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, uploadPath.resolve(storageFileName),
+
+            Path uploadPath = Paths.get(STORAGE_DOKUMENTY_DIR);
+            Files.createDirectories(uploadPath);
+            try (InputStream is = file.getInputStream()) {
+                Files.copy(is, uploadPath.resolve(storageFileName),
                         StandardCopyOption.REPLACE_EXISTING);
             }
 
@@ -212,11 +228,11 @@ public class DokumentController {
             plik.setDataDodania(new Date(currentTime));
             plik.setNazwaPliku(storageFileName);
             plik.setDokument(dokument);
-
             dokument.getPliki().add(plik);
             dokumentyRepo.save(dokument);
-        } catch (StorageException ex) {
-            throw ex;
+
+        } catch (InvalidFileTypeException | VirusFoundException ex) {
+            redirect.addFlashAttribute("fileError", ex.getMessage());
         } catch (Exception ex) {
             throw new ControllerOperationException("Nie udało się dodać pliku do dokumentu", ex);
         }
@@ -299,4 +315,17 @@ public class DokumentController {
             throw new StorageException("Nie udało się usunąć pliku: " + fileName, ex);
         }
     }
+
+    private void validatePdf(MultipartFile file) throws IOException {
+        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
+            throw new InvalidFileTypeException("Dozwolony typ pliku: PDF");
+        }
+        try (InputStream is = file.getInputStream()) {
+            byte[] head = is.readNBytes(5);
+            if (head.length < 5 || !"%PDF-".equals(new String(head, StandardCharsets.US_ASCII))) {
+                throw new InvalidFileTypeException("Dozwolony typ pliku: PDF");
+            }
+        }
+    }
+
 }
