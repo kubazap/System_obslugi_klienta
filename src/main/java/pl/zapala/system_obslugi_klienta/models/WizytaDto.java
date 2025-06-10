@@ -1,7 +1,6 @@
 package pl.zapala.system_obslugi_klienta.models;
 
 import jakarta.validation.constraints.*;
-import jdk.jfr.BooleanFlag;
 import pl.zapala.system_obslugi_klienta.validators.*;
 
 import java.sql.Date;
