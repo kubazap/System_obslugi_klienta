@@ -8,11 +8,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = BirthDateValidator.class)
+@Constraint(validatedBy = MoneyValidator.class)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidBirthDate {
-    String message() default "Podaj poprawną datę";
+public @interface ValidMoney {
+    String message() default "Podaj poprawną kwotę. {kwota zł/eur/usd}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

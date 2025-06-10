@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidTime {
-    String message() default "Nieprawidłowy format godziny (oczekiwany format: hh.mm)";
+    String message() default "Nieprawidłowy format godziny (hh.mm)";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

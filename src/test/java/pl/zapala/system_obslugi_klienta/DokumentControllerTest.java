@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ExtendedModelMap;
@@ -14,11 +15,16 @@ import pl.zapala.system_obslugi_klienta.models.Dokument;
 import pl.zapala.system_obslugi_klienta.models.DokumentDto;
 import pl.zapala.system_obslugi_klienta.models.Plik;
 import pl.zapala.system_obslugi_klienta.repositories.DokumentRepository;
+import pl.zapala.system_obslugi_klienta.services.AntivirusService;
 
+import static org.mockito.Mockito.*;
+import java.io.*;
+
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,21 +64,46 @@ class DokumentControllerTest {
     @Nested
     @DisplayName("Operacje na dokumentach")
     class DokumentTests {
-
         @Test
-        @DisplayName("Dodawanie dokumentu bez pliku")
-        void shouldAddDokumentSuccessfully() {
+        @DisplayName("Dodawanie dokumentu z plikiem")
+        void shouldAddDokumentSuccessfully() throws IOException {
+
+            AntivirusService antivirusServiceMock = mock(AntivirusService.class);
+            DokumentController dokumentController = new DokumentController(
+                    dokumentRepository,
+                    mock(pl.zapala.system_obslugi_klienta.repositories.PlikRepository.class),
+                    mock(pl.zapala.system_obslugi_klienta.repositories.PracownikRepository.class),
+                    antivirusServiceMock
+            );
+
             BindingResult result = new BeanPropertyBindingResult(dokumentDto, "dokumentDto");
+            ExtendedModelMap model = new ExtendedModelMap();
 
-            String viewName = dokumentController.addDokumentWithPlik(dokumentDto, result, null);
+            byte[] pdfContent = "%PDF-1.4 sample".getBytes(StandardCharsets.US_ASCII); // poprawny nagłówek PDF
+            MockMultipartFile mockFile = new MockMultipartFile(
+                    "file",
+                    "plik_testowy.pdf",
+                    "application/pdf",
+                    pdfContent
+            );
 
+            // when
+            String viewName = dokumentController.addDokumentWithPlik(dokumentDto, result, mockFile, model);
+
+            // then
             assertEquals("redirect:/dokumenty", viewName);
 
-            Dokument added = dokumentRepository.findAll().get(0);
+            List<Dokument> wszystkie = dokumentRepository.findAll();
+            assertEquals(1, wszystkie.size());
+
+            Dokument added = wszystkie.get(0);
             assertEquals("Umowa", added.getNazwaDokumentu());
             assertEquals("PDF", added.getTyp());
             assertTrue(added.getStatus());
             assertEquals("Kluczowy dokument", added.getUwagi());
+
+            // verify antivirus scan was triggered
+            verify(antivirusServiceMock).scan((byte[]) any());
         }
 
         @Test

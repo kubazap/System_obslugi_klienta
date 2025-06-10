@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidPostal {
-    String message() default "Nieprawidłowy format kodu pocztowego (oczekiwany format: xx-xxx)";
+    String message() default "Nieprawidłowy format kodu pocztowego {xx-xxx}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

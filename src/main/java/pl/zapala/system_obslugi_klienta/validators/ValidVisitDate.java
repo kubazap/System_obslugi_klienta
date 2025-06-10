@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidVisitDate {
-    String message() default "Podaj poprawna date";
+    String message() default "Podaj poprawną datę";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

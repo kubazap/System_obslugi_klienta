@@ -3,9 +3,7 @@ package pl.zapala.system_obslugi_klienta.models;
 import jakarta.validation.constraints.*;
 import java.sql.Date;
 
-import pl.zapala.system_obslugi_klienta.validators.ValidBirthDate;
-import pl.zapala.system_obslugi_klienta.validators.ValidName;
-import pl.zapala.system_obslugi_klienta.validators.ValidPostal;
+import pl.zapala.system_obslugi_klienta.validators.*;
 
 public class KlientDto {
     @NotEmpty(message= "Pole imię jest wymagane.")
@@ -19,6 +17,7 @@ public class KlientDto {
     @ValidBirthDate
     private Date dataUrodzenia;
     @NotEmpty(message= "Pole ulicy i numeru domu jest wymagane.")
+    @ValidStreet
     private String ulicaNumerDomu;
     @NotEmpty(message= "Pole miejscowości jest wymagane.")
     @ValidName
@@ -26,6 +25,7 @@ public class KlientDto {
     @NotEmpty(message= "Pole kodu pocztowego jest wymagane. Poprawny format kodu: XX-XXX.")
     @ValidPostal
     private String kodPocztowy;
+    @ValidPhone
     private String numerTelefonu;
     @Email
     //@ValidEmail

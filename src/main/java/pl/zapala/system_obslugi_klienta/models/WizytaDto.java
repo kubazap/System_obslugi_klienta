@@ -1,8 +1,8 @@
 package pl.zapala.system_obslugi_klienta.models;
 
 import jakarta.validation.constraints.*;
-import pl.zapala.system_obslugi_klienta.validators.ValidTime;
-import pl.zapala.system_obslugi_klienta.validators.ValidVisitDate;
+import jdk.jfr.BooleanFlag;
+import pl.zapala.system_obslugi_klienta.validators.*;
 
 import java.sql.Date;
 
@@ -14,9 +14,12 @@ public class WizytaDto {
     @ValidTime
     private String godzina;
     @NotEmpty(message= "Pole pokoju jest wymagane.")
+    @ValidRoom
     private String pokoj;
+
     private Boolean czyOplacona;
     @NotEmpty(message= "Pole należności jest wymagane.")
+    @ValidMoney
     private String naleznosc;
     @NotEmpty(message= "Pole sposobu płatności jest wymagane.")
     private String sposobPlatnosci;

@@ -1,8 +1,12 @@
 package pl.zapala.system_obslugi_klienta.models;
 
+import pl.zapala.system_obslugi_klienta.validators.ValidName;
+
 public class PracownikDto {
     private Integer id;
+    @ValidName
     private String imie;
+    @ValidName
     private String nazwisko;
 
     public PracownikDto() {

@@ -8,11 +8,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = BirthDateValidator.class)
+@Constraint(validatedBy = PhoneValidator.class)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidBirthDate {
-    String message() default "Podaj poprawną datę";
+public @interface ValidPhone {
+    String message() default "Podaj poprawny numer telefonu.{np. +48 123 123 123}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
