@@ -12,11 +12,11 @@ public class Message {
     private Long id;
 
     private Integer senderId;
-    private String senderFirstName; // Dodane pole
-    private String senderLastName;  // Dodane pole
+    private String senderFirstName;
+    private String senderLastName;
     private Integer receiverId;
-    private String receiverFirstName; // Dodane pole
-    private String receiverLastName;  // Dodane pole
+    private String receiverFirstName;
+    private String receiverLastName;
     private String content;
 
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")

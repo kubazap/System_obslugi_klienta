@@ -8,6 +8,7 @@ import pl.zapala.system_obslugi_klienta.models.Pracownik;
 import pl.zapala.system_obslugi_klienta.models.PracownikDto;
 import pl.zapala.system_obslugi_klienta.repositories.MessageRepository;
 import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
+import pl.zapala.system_obslugi_klienta.services.NotificationService;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -25,13 +26,17 @@ public class MessageController {
 
     private final MessageRepository messageRepository;
     private final PracownikRepository pracownikRepository;
+    private final NotificationService notificationService;
 
     public MessageController(
             MessageRepository messageRepository,
-            PracownikRepository pracownikRepository) {
+            PracownikRepository pracownikRepository,
+            NotificationService notificationService) {
         this.messageRepository = messageRepository;
         this.pracownikRepository = pracownikRepository;
+        this.notificationService = notificationService;
     }
+
 
     @GetMapping("/{user1Id}/{user2Id}")
     public List<MessageDto> getConversation(
@@ -62,7 +67,15 @@ public class MessageController {
 
         message.setContent(messageDto.getContent());
         message.setSentAt(OffsetDateTime.now(WARSAW_ZONE));
-        return messageRepository.save(message);
+        Message saved = messageRepository.save(message);
+
+        notificationService.createNotification(
+                message.getReceiverId(),
+                "NEW_MESSAGE",
+                "You have a new message from " + message.getSenderFirstName() + " " + message.getSenderLastName()
+        );
+
+        return saved;
     }
 
     @GetMapping("/conversations/{userId}")

@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+	
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
     <title>Klienci</title>
 
@@ -21,7 +24,7 @@
     <link th:href="@{/vendor/datatables/dataTables.bootstrap4.min.css}" rel="stylesheet">
 </head>
 
-<body id="page-top">
+<body id="page-top" th:attr="data-sender-id=${pracownik.id}">
 <!-- Page Wrapper -->
 <div id="wrapper">
 
@@ -124,7 +127,9 @@
                                     Uzyskane zyski w poprzednim miesiącu: 21 370 zł.
                                 </div>
                             </a>
-                            <a class="dropdown-item text-center small text-gray-500" href="#">Wszystkie powiadomienia</a>
+                            <a id="showAllNotifications" class="dropdown-item text-center small text-gray-500" href="#">
+								Wszystkie powiadomienia
+							</a>
                         </div>
                     </li>
 
@@ -243,6 +248,25 @@
     </div>
 </div>
 
+<!-- Modal: Wszystkie Powiadomienia -->
+<div class="modal fade" id="allNotificationsModal" tabindex="-1" role="dialog" aria-labelledby="allNotificationsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="allNotificationsLabel">Wszystkie powiadomienia</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Zamknij">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="allNotificationsBody">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="preloader"></div>
 
 <!-- JS -->
@@ -252,6 +276,7 @@
 <script th:src="@{/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
 <script th:src="@{/js/demo/datatables-demo.js}"></script>
 <script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/notifications.js}"></script>
 
 </body>
 </html>
