@@ -13,11 +13,32 @@ import org.springframework.http.HttpMethod;
 import pl.zapala.system_obslugi_klienta.security.MfaCompletionFilter;
 import pl.zapala.system_obslugi_klienta.security.MfaSuccessHandler;
 
+/**
+ * Konfiguracja bezpieczeństwa aplikacji.
+ * Definiuje reguły dostępu do zasobów, ustawienia logowania, wylogowania
+ * oraz integrację wieloskładnikowego uwierzytelniania (MFA).
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    /**
+     * Konfiguruje łańcuch filtrów bezpieczeństwa (SecurityFilterChain).
+     * <ul>
+     *     <li>Umożliwia dostęp do strony logowania i zasobów statycznych bez uwierzytelnienia.</li>
+     *     <li>Pozwala na publiczny dostęp do endpointów wiadomości.</li>
+     *     <li>Wymaga uwierzytelnienia dla pozostałych żądań.</li>
+     *     <li>Ustawia niestandardową stronę logowania oraz parametry formularza.</li>
+     *     <li>Dodaje obsługę sukcesu logowania z wysłaniem TOTP oraz filtr kończący MFA.</li>
+     * </ul>
+     *
+     * @param http           konfigurator HTTP Security
+     * @param successHandler handler obsługujący sukces logowania (wysłanie kodu TOTP)
+     * @param mfaFilter      filtr kończący proces MFA po weryfikacji kodu
+     * @return zbudowany łańcuch filtrów bezpieczeństwa
+     * @throws Exception w przypadku problemów z konfiguracją HTTP Security
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            MfaSuccessHandler successHandler,
@@ -41,6 +62,11 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Definiuje bean PasswordEncoder wykorzystujący bcrypt do haszowania haseł.
+     *
+     * @return instancja BCryptPasswordEncoder
+     */
     @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();

@@ -10,13 +10,32 @@ import dev.samstevens.totp.time.SystemTimeProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Konfiguracja komponentów TOTP używanych do generowania sekretów i weryfikacji kodów.
+ */
 @Configuration
 public class TotpConfig {
+
+    /**
+     * Bean odpowiedzialny za generowanie sekretów TOTP.
+     *
+     * @return instancja DefaultSecretGenerator tworząca nowe sekrety
+     */
     @Bean
     public SecretGenerator secretGenerator() {
         return new DefaultSecretGenerator();
     }
 
+    /**
+     * Bean odpowiedzialny za weryfikację kodów TOTP.
+     * <ul>
+     *     <li>Używa algorytmu SHA1 i długości kodu 6 cyfr.</li>
+     *     <li>Okres czasu ustawiony na 30 sekund.</li>
+     *     <li>Dopuszczalne opóźnienie do 4 okresów (±120 sekund) dla synchronizacji czasu.</li>
+     * </ul>
+     *
+     * @return skonfigurowany DefaultCodeVerifier do sprawdzania poprawności kodów
+     */
     @Bean
     public CodeVerifier totpVerifier() {
         DefaultCodeVerifier v = new DefaultCodeVerifier(

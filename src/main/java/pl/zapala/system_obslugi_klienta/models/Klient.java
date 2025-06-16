@@ -5,20 +5,64 @@ import jakarta.persistence.*;
 import java.sql.Date;
 import java.util.List;
 
+/**
+ * Encja reprezentująca klienta w systemie obsługi.
+ * Przechowuje dane osobowe klienta oraz powiązane wizyty.
+ */
 @Entity
-@Table(name="klienci")
+@Table(name = "klienci")
 public class Klient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    /**
+     * Imię klienta.
+     */
     private String imie;
+
+    /**
+     * Nazwisko klienta.
+     */
     private String nazwisko;
+
+    /**
+     * Data urodzenia klienta.
+     */
     private Date dataUrodzenia;
+
+    /**
+     * Ulica i numer domu, miejsce zamieszkania klienta.
+     * Przykład: "Marszałkowska 10".
+     */
     private String ulicaNumerDomu;
+
+    /**
+     * Miejscowość zamieszkania klienta.
+     */
     private String miejscowosc;
+
+    /**
+     * Kod pocztowy miejsca zamieszkania.
+     * Format: "00-001".
+     */
     private String kodPocztowy;
+
+    /**
+     * Numer telefonu kontaktowego klienta.
+     */
     private String numerTelefonu;
+
+    /**
+     * Adres e-mail klienta.
+     */
     private String email;
+
+    /**
+     * Lista wizyt powiązanych z klientem.
+     * Kaskadowe usuwanie zapewnia usunięcie wizyt wraz z klientem.
+     */
     @OneToMany(mappedBy = "klient", cascade = CascadeType.ALL)
     private List<Wizyta> wizyty;
 

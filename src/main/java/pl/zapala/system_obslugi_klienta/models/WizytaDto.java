@@ -5,25 +5,71 @@ import pl.zapala.system_obslugi_klienta.validators.*;
 
 import java.sql.Date;
 
+/**
+ * DTO używane w API i formularzach do wprowadzania i przesyłania danych wizyty.
+ */
 public class WizytaDto {
-    @NotNull(message= "Pole daty wizyty jest wymagane.")
+
+    /**
+     * Data wizyty.
+     * Pole wymagane — nie może być null.
+     * Walidowane adnotacją @ValidVisitDate (musi być dzisiejsza lub przyszła).
+     */
+    @NotNull(message = "Pole daty wizyty jest wymagane.")
     @ValidVisitDate
     private Date dataWizyty;
-    @NotEmpty(message= "Pole godziny jest wymagane.")
+
+    /**
+     * Godzina wizyty w formacie "HH:mm".
+     * Pole wymagane — nie może być puste.
+     * Walidowane adnotacją @ValidTime.
+     */
+    @NotEmpty(message = "Pole godziny jest wymagane.")
     @ValidTime
     private String godzina;
-    @NotEmpty(message= "Pole pokoju jest wymagane.")
+
+    /**
+     * Numer lub nazwa pokoju, w którym odbywa się wizyta.
+     * Pole wymagane — nie może być puste.
+     * Walidowane adnotacją @ValidRoom.
+     */
+    @NotEmpty(message = "Pole pokoju jest wymagane.")
     @ValidRoom
     private String pokoj;
 
+    /**
+     * Flaga wskazująca, czy wizyta została opłacona.
+     * Pole opcjonalne — jeśli null, traktowane jako nieopłacona (false).
+     */
     private Boolean czyOplacona;
-    @NotEmpty(message= "Pole należności jest wymagane.")
+
+    /**
+     * Kwota należności związanej z wizytą.
+     * Pole wymagane — nie może być puste.
+     * Walidowane adnotacją @ValidMoney (np. format liczbowy z dwiema cyframi po przecinku).
+     */
+    @NotEmpty(message = "Pole należności jest wymagane.")
     @ValidMoney
     private String naleznosc;
-    @NotEmpty(message= "Pole sposobu płatności jest wymagane.")
+
+    /**
+     * Sposób dokonania płatności (np. "Karta kredytowa", "Gotówka", "Blik").
+     * Pole wymagane — nie może być puste.
+     */
+    @NotEmpty(message = "Pole sposobu płatności jest wymagane.")
     private String sposobPlatnosci;
+
+    /**
+     * Dodatkowe uwagi dotyczące wizyty.
+     * Pole opcjonalne — może zawierać instrukcje lub komentarze.
+     */
     private String uwagi;
-    @NotNull
+
+    /**
+     * Identyfikator klienta, dla którego planowana jest wizyta.
+     * Pole wymagane — nie może być null.
+     */
+    @NotNull(message = "Pole klienta jest wymagane.")
     private Integer klientId;
 
     public Integer getKlientId() {

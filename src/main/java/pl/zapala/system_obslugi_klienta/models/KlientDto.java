@@ -5,30 +5,78 @@ import java.sql.Date;
 
 import pl.zapala.system_obslugi_klienta.validators.*;
 
+/**
+ * DTO używane w API i formularzach do wprowadzania i przesyłania danych klienta.
+ */
 public class KlientDto {
-    @NotEmpty(message= "Pole imię jest wymagane.")
+
+    /**
+     * Imię klienta.
+     * Pole wymagane — nie może być puste.
+     * Walidowane za pomocą @ValidName (tylko litery, bez cyfr i znaków specjalnych).
+     */
+    @NotEmpty(message = "Pole imię jest wymagane.")
     @ValidName
     private String imie;
-    @NotEmpty(message= "Pole nazwisko jest wymagane.")
+
+    /**
+     * Nazwisko klienta.
+     * Pole wymagane — nie może być puste.
+     * Walidowane za pomocą @ValidName.
+     */
+    @NotEmpty(message = "Pole nazwisko jest wymagane.")
     @ValidName
     private String nazwisko;
+
+    /**
+     * Data urodzenia klienta.
+     * Pole wymagane — nie może być null.
+     * Musi wskazywać datę z przeszłości (@Past) i spełniać dodatkowe reguły @ValidBirthDate.
+     */
     @Past
-    @NotNull(message= "Pole daty urodzin jest wymagane.")
+    @NotNull(message = "Pole daty urodzin jest wymagane.")
     @ValidBirthDate
     private Date dataUrodzenia;
-    @NotEmpty(message= "Pole ulicy i numeru domu jest wymagane.")
+
+    /**
+     * Ulica i numer domu zamieszkania klienta.
+     * Pole wymagane — nie może być puste.
+     * Walidowane za pomocą @ValidStreet (np. "Marszałkowska 10").
+     */
+    @NotEmpty(message = "Pole ulicy i numeru domu jest wymagane.")
     @ValidStreet
     private String ulicaNumerDomu;
-    @NotEmpty(message= "Pole miejscowości jest wymagane.")
+
+    /**
+     * Miejscowość zamieszkania klienta.
+     * Pole wymagane — nie może być puste.
+     * Walidowane za pomocą @ValidName.
+     */
+    @NotEmpty(message = "Pole miejscowości jest wymagane.")
     @ValidName
     private String miejscowosc;
-    @NotEmpty(message= "Pole kodu pocztowego jest wymagane. Poprawny format kodu: XX-XXX.")
+
+    /**
+     * Kod pocztowy miejsca zamieszkania.
+     * Pole wymagane — nie może być puste.
+     * Format: XX-XXX, walidowany przez @ValidPostal.
+     */
+    @NotEmpty(message = "Pole kodu pocztowego jest wymagane. Poprawny format kodu: XX-XXX.")
     @ValidPostal
     private String kodPocztowy;
+
+    /**
+     * Numer telefonu kontaktowego.
+     * Pole opcjonalne — jeśli podane, walidowane przez @ValidPhone.
+     */
     @ValidPhone
     private String numerTelefonu;
-    @Email
-    //@ValidEmail
+
+    /**
+     * Adres e-mail klienta.
+     * Pole opcjonalne — jeśli podane, musi być poprawnym adresem e-mail (@Email).
+     */
+    @Email(message = "Niepoprawny format adresu e-mail.")
     private String email;
 
     public String getImie() {

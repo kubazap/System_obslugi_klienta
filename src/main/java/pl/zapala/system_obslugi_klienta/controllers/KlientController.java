@@ -14,6 +14,11 @@ import pl.zapala.system_obslugi_klienta.models.Pracownik;
 import pl.zapala.system_obslugi_klienta.repositories.KlientRepository;
 import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
 
+/**
+ * Kontroler zarządzający operacjami CRUD dla encji Klient.
+ * <p>
+ * Obsługuje wyświetlanie listy klientów oraz tworzenie, edycję i usuwanie klientów.
+ */
 @Controller
 @RequestMapping("/klienci")
 public class KlientController {
@@ -26,12 +31,23 @@ public class KlientController {
     private final KlientRepository klientRepo;
     private final PracownikRepository pracownikRepo;
 
+    /**
+     * Konstruktor inicjalizujący zależności kontrolera.
+     *
+     * @param klientRepo     repozytorium klientów do operacji CRUD
+     * @param pracownikRepo  repozytorium pracowników dla kontekstu zalogowanego
+     */
     public KlientController(KlientRepository klientRepo,
                             PracownikRepository pracownikRepo) {
         this.klientRepo    = klientRepo;
         this.pracownikRepo = pracownikRepo;
     }
 
+    /**
+     * Dodaje do modelu zalogowanego Pracownika, jeśli dostępne uwierzytelnienie.
+     *
+     * @param model obiekt Model dla widoku
+     */
     @ModelAttribute
     public void loggedPracownik(Model model) {
         var auth = SecurityContextHolder.getContext().getAuthentication();
@@ -44,6 +60,12 @@ public class KlientController {
         }
     }
 
+    /**
+     * Wyświetla listę wszystkich klientów.
+     *
+     * @param model obiekt Model dla widoku
+     * @return nazwa widoku listy klientów
+     */
     @GetMapping({"","/"})
     public String getKlienci(Model model) {
         var klienci = klientRepo.findAll();
@@ -52,6 +74,12 @@ public class KlientController {
         return "klienci/index";
     }
 
+    /**
+     * Inicjuje formularz dodawania nowego klienta.
+     *
+     * @param model obiekt Model dla widoku
+     * @return nazwa widoku formularza dodawania
+     */
     @GetMapping("/dodaj")
     public String createKlient(Model model) {
         KlientDto klientDto = new KlientDto();
@@ -60,6 +88,15 @@ public class KlientController {
         return REDIRECT_ADD_KLIENT;
     }
 
+    /**
+     * Obsługuje zapis nowego klienta po przesłaniu formularza.
+     * <p>
+     * Sprawdza unikalność adresu e-mail oraz waliduje pola DTO.
+     *
+     * @param klientDto DTO z danymi klienta
+     * @param result    wynik walidacji i unikalności e-mail
+     * @return przekierowanie do listy klientów lub ponowny widok formularza
+     */
     @PostMapping("/dodaj")
     public String createKlient(@Valid @ModelAttribute KlientDto klientDto, BindingResult result) {
 
@@ -89,6 +126,13 @@ public class KlientController {
         return REDIRECT_KLIENCI;
     }
 
+    /**
+     * Wyświetla formularz edycji istniejącego klienta.
+     *
+     * @param id    identyfikator klienta do edycji
+     * @param model obiekt Model dla widoku
+     * @return nazwa widoku edycji lub przekierowanie, jeśli klient nie istnieje
+     */
     @GetMapping("/edytuj")
     public String editKlient(Model model, @RequestParam int id) {
 
@@ -114,6 +158,15 @@ public class KlientController {
         return REDIRECT_EDIT_KLIENT;
     }
 
+    /**
+     * Obsługuje zapis zmian edytowanego klienta.
+     *
+     * @param model    obiekt Model przy błędach walidacji
+     * @param id       identyfikator klienta
+     * @param klientDto DTO z zaktualizowanymi danymi
+     * @param result   wynik walidacji DTO
+     * @return przekierowanie do listy klientów lub ponowny widok edycji
+     */
     @PostMapping("/edytuj")
     public String editKlient(Model model, @RequestParam int id, @Valid @ModelAttribute KlientDto klientDto, BindingResult result) {
 
@@ -153,6 +206,12 @@ public class KlientController {
         return REDIRECT_KLIENCI;
     }
 
+    /**
+     * Usuwa istniejącego klienta.
+     *
+     * @param id identyfikator klienta do usunięcia
+     * @return przekierowanie do listy klientów
+     */
     @GetMapping("/usun")
     public String deleteKlient(@RequestParam int id) {
 

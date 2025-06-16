@@ -1,14 +1,62 @@
 package pl.zapala.system_obslugi_klienta.models;
 
+/**
+ * DTO używane w API do przesyłania danych wiadomości między front-endem a back-endem.
+ */
 public class MessageDto {
+
+    /**
+     * Unikalny identyfikator wiadomości.
+     * Pozwala rozróżnić wiadomości w odpowiedziach API.
+     */
     private Long id;
+
+    /**
+     * Identyfikator nadawcy wiadomości.
+     * Używane w żądaniach wysyłania i do oznaczenia rozmówcy w interfejsie.
+     */
     private Integer senderId;
+
+    /**
+     * Imię nadawcy wiadomości.
+     * Przydatne do wyświetlania pełnej informacji o rozmówcy.
+     */
     private String senderFirstName;
+
+    /**
+     * Nazwisko nadawcy wiadomości.
+     * Przydatne do wyświetlania pełnej informacji o rozmówcy.
+     */
     private String senderLastName;
+
+    /**
+     * Identyfikator odbiorcy wiadomości.
+     * Używane do routowania wiadomości w API i w logice powiadomień.
+     */
     private Integer receiverId;
+
+    /**
+     * Imię odbiorcy wiadomości.
+     * Wyświetlane w interfejsie obok treści wiadomości.
+     */
     private String receiverFirstName;
+
+    /**
+     * Nazwisko odbiorcy wiadomości.
+     * Wyświetlane w interfejsie obok treści wiadomości.
+     */
     private String receiverLastName;
+
+    /**
+     * Treść wiadomości przesyłanej między pracownikami.
+     * Pole obowiązkowe przy wysyłaniu nowej wiadomości.
+     */
     private String content;
+
+    /**
+     * Znacznik czasu wysłania wiadomości w formacie ISO_OFFSET_DATE_TIME.
+     * Umożliwia front-endowi poprawne wyświetlenie daty i godziny.
+     */
     private String timestamp;
 
     public Long getId() { return id; }

@@ -2,16 +2,41 @@ package pl.zapala.system_obslugi_klienta.models;
 
 import jakarta.persistence.*;
 
+/**
+ * Encja reprezentująca pracownika w systemie obsługi klienta.
+ * Przechowuje dane uwierzytelniające oraz sekret TOTP do MFA.
+ */
 @Entity
-@Table(name="pracownicy")
+@Table(name = "pracownicy")
 public class Pracownik {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    /**
+     * Imię pracownika.
+     */
     private String imie;
+
+    /**
+     * Nazwisko pracownika.
+     */
     private String nazwisko;
+
+    /**
+     * Unikalny adres e-mail służący do logowania.
+     */
     private String email;
+
+    /**
+     * Zahaszowane hasło pracownika (bcrypt).
+     */
     private String haslo;
+
+    /**
+     * Sekret używany do generowania kodów TOTP dla drugiego czynnika uwierzytelniania.
+     */
     private String totpSecret;
 
     public Integer getId() {

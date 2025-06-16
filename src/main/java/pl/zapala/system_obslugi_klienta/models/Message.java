@@ -3,6 +3,10 @@ package pl.zapala.system_obslugi_klienta.models;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
+/**
+ * Encja reprezentująca wiadomość wymienioną między pracownikami.
+ * Zawiera informacje o nadawcy, odbiorcy, treści oraz czasie wysłania.
+ */
 @Entity
 @Table(name = "messages")
 public class Message {
@@ -11,14 +15,44 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Identyfikator nadawcy wiadomości (klucz do encji Pracownik).
+     */
     private Integer senderId;
+
+    /**
+     * Imię nadawcy wiadomości, używane do wyświetlania w interfejsie.
+     */
     private String senderFirstName;
+
+    /**
+     * Nazwisko nadawcy wiadomości, używane do wyświetlania w interfejsie.
+     */
     private String senderLastName;
+
+    /**
+     * Identyfikator odbiorcy wiadomości (klucz do encji Pracownik).
+     */
     private Integer receiverId;
+
+    /**
+     * Imię odbiorcy wiadomości, używane do wyświetlania w interfejsie.
+     */
     private String receiverFirstName;
+
+    /**
+     * Nazwisko odbiorcy wiadomości, używane do wyświetlania w interfejsie.
+     */
     private String receiverLastName;
+
+    /**
+     * Treść wiadomości przesyłanej między pracownikami.
+     */
     private String content;
 
+    /**
+     * Czas wysłania wiadomości, przechowywany z informacją o strefie czasowej.
+     */
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime sentAt;
 

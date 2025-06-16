@@ -2,22 +2,30 @@ package pl.zapala.system_obslugi_klienta.models;
 
 import pl.zapala.system_obslugi_klienta.validators.ValidName;
 
+/**
+ * DTO reprezentujące minimalne informacje o pracowniku przesyłane w API.
+ * Używane do wyświetlania list pracowników lub wyboru rozmówcy.
+ */
 public class PracownikDto {
+
+    /**
+     * Unikalny identyfikator pracownika.
+     */
     private Integer id;
+
+    /**
+     * Imię pracownika.
+     * Walidowane adnotacją @ValidName — tylko litery, bez cyfr i znaków specjalnych.
+     */
     @ValidName
     private String imie;
+
+    /**
+     * Nazwisko pracownika.
+     * Walidowane adnotacją @ValidName.
+     */
     @ValidName
     private String nazwisko;
-
-    public PracownikDto() {
-    }
-
-    public PracownikDto(Integer id, String imie, String nazwisko) {
-        this.id = id;
-        this.imie = imie;
-        this.nazwisko = nazwisko;
-    }
-
     public Integer getId() {return id;}
 
     public String getImie() {return imie;}

@@ -33,6 +33,12 @@ import java.sql.Date;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Kontroler zarządzający dokumentami i powiązanymi plikami.
+ * <p>
+ * Umożliwia wyświetlanie, tworzenie, edytowanie, pobieranie oraz usuwanie dokumentów,
+ * a także zarządzanie plikami PDF z walidacją typu i skanowaniem antywirusowym.
+ */
 @Controller
 @RequestMapping("/dokumenty")
 public class DokumentController {
@@ -49,6 +55,14 @@ public class DokumentController {
     private final PracownikRepository pracownikRepo;
     private final AntivirusService antivirusService;
 
+    /**
+     * Konstruktor inicjalizujący zależności kontrolera dokumentów.
+     *
+     * @param dokumentyRepo   repozytorium dokumentów do operacji CRUD
+     * @param plikiRepo       repozytorium plików powiązanych z dokumentami
+     * @param pracownikRepo   repozytorium pracowników do pobierania kontekstu zalogowanego
+     * @param antivirusService serwis do skanowania plików
+     */
     public DokumentController(DokumentRepository dokumentyRepo,
                               PlikRepository plikiRepo,
                               PracownikRepository pracownikRepo,
@@ -59,6 +73,11 @@ public class DokumentController {
         this.antivirusService = antivirusService;
     }
 
+    /**
+     * Dodaje do modelu obiekt zalogowanego Pracownika, jeśli uwierzytelniony.
+     *
+     * @param model obiekt Model dla widoku
+     */
     @ModelAttribute
     public void loggedPracownik(Model model) {
         var auth = SecurityContextHolder.getContext().getAuthentication();
@@ -71,6 +90,12 @@ public class DokumentController {
         }
     }
 
+    /**
+     * Wyświetla widok listy dokumentów.
+     *
+     * @param model obiekt Model dla widoku
+     * @return nazwa widoku dokumentów
+     */
     @GetMapping({"", "/"})
     public String getDokumenty(Model model) {
         List<Dokument> dokumenty = dokumentyRepo.findAll();
@@ -78,12 +103,29 @@ public class DokumentController {
         return "dokumenty/index";
     }
 
+    /**
+     * Inicjuje formularz dodawania nowego dokumentu.
+     *
+     * @param model obiekt Model dla widoku
+     * @return nazwa widoku formularza dodawania
+     */
     @GetMapping("/dodaj")
     public String createDokument(Model model) {
         model.addAttribute(ATTR_DOKUMENT_DTO, new DokumentDto());
         return REDIRECT_ADD_DOKUMENT;
     }
 
+    /**
+     * Obsługuje utworzenie dokumentu z opcjonalnym plikiem PDF.
+     * <p>
+     * Waliduje DTO, typ pliku, skanuje antywirusowo, zapisuje dokument i plik.
+     *
+     * @param dokumentDto DTO z danymi dokumentu
+     * @param result      wynik walidacji DTO
+     * @param file        opcjonalny plik do zapisu
+     * @param model       obiekt Model na wypadek błędów
+     * @return przekierowanie lub widok formularza przy błędach
+     */
     @PostMapping("/dodaj")
     public String addDokumentWithPlik(
             @Valid @ModelAttribute(ATTR_DOKUMENT_DTO) DokumentDto dokumentDto,
@@ -137,6 +179,13 @@ public class DokumentController {
         return REDIRECT_DOKUMENTY;
     }
 
+    /**
+     * Wyświetla formularz edycji istniejącego dokumentu.
+     *
+     * @param id    identyfikator dokumentu do edycji
+     * @param model obiekt Model dla widoku
+     * @return nazwa widoku edycji lub przekierowanie do listy przy braku dokumentu
+     */
     @GetMapping("/edytuj")
     public String editDokument(@RequestParam int id, Model model) {
         Dokument dokument = dokumentyRepo.findById(id).orElse(null);
@@ -158,6 +207,16 @@ public class DokumentController {
         return "dokumenty/edytuj";
     }
 
+    /**
+     * Obsługuje aktualizację danych dokumentu.
+     *
+     * @param model       obiekt Model dla widoku przy błędach
+     * @param id          identyfikator dokumentu
+     * @param dokumentDto DTO z nowymi danymi dokumentu
+     * @param result      wynik walidacji DTO
+     * @param file        opcjonalny plik do dodania
+     * @return przekierowanie do listy dokumentów lub ponowny widok edycji
+     */
     @PostMapping("/edytuj")
     public String updateDokument(Model model,
                                  @RequestParam int id,
@@ -192,6 +251,14 @@ public class DokumentController {
         return REDIRECT_DOKUMENTY;
     }
 
+    /**
+     * Dodaje dodatkowy plik PDF do istniejącego dokumentu.
+     *
+     * @param id       identyfikator dokumentu
+     * @param file     plik do dodania
+     * @param redirect atrybuty przekierowania na wypadek błędu
+     * @return przekierowanie do widoku edycji dokumentu
+     */
     @PostMapping("/edytuj/dodajPlik")
     public String addAnotherPlikToDokument(@RequestParam int id,
                                            @RequestParam MultipartFile file,
@@ -239,6 +306,12 @@ public class DokumentController {
         return REDIRECT_EDIT_DOKUMENT + id;
     }
 
+    /**
+     * Pobiera plik PDF powiązany z dokumentem.
+     *
+     * @param fileId identyfikator pliku
+     * @return ResponseEntity zawierające zasób pliku lub status not found
+     */
     @GetMapping("/pobierzPlik")
     public ResponseEntity<Object> pobierzPlik(@RequestParam int fileId) {
         try {
@@ -261,6 +334,13 @@ public class DokumentController {
         }
     }
 
+    /**
+     * Usuwa plik PDF powiązany z dokumentem.
+     *
+     * @param documentId identyfikator dokumentu
+     * @param fileId     identyfikator pliku do usunięcia
+     * @return przekierowanie do widoku edycji dokumentu
+     */
     @GetMapping("/usunPlik")
     public String usunPlik(@RequestParam int documentId, @RequestParam int fileId) {
         try {
@@ -279,6 +359,12 @@ public class DokumentController {
         return REDIRECT_EDIT_DOKUMENT + documentId;
     }
 
+    /**
+     * Usuwa dokument oraz powiązane pliki z dysku i bazy.
+     *
+     * @param dokumentId identyfikator dokumentu do usunięcia
+     * @return przekierowanie do listy dokumentów
+     */
     @GetMapping("/usun")
     public String deleteDokument(@RequestParam("id") int dokumentId) {
         try {
@@ -297,6 +383,11 @@ public class DokumentController {
         return REDIRECT_DOKUMENTY;
     }
 
+    /**
+     * Usuwa wszystkie pliki powiązane z dokumentem z dysku.
+     *
+     * @param dokument dokument, którego pliki mają zostać usunięte
+     */
     private void deleteAssociatedFiles(Dokument dokument) {
         if (dokument.getPliki() == null) {
             return;
@@ -305,7 +396,11 @@ public class DokumentController {
             deleteFile(plik.getNazwaPliku());
         }
     }
-
+    /**
+     * Usuwa pojedynczy plik z dysku.
+     *
+     * @param fileName nazwa pliku do usunięcia
+     */
     private void deleteFile(String fileName) {
         try {
             Path filePath = Paths.get(STORAGE_DOKUMENTY_DIR)
@@ -316,6 +411,13 @@ public class DokumentController {
         }
     }
 
+    /**
+     * Waliduje, że przesłany plik jest prawidłowym PDF-em.
+     *
+     * @param file plik do weryfikacji
+     * @throws IOException              przy błędzie odczytu
+     * @throws InvalidFileTypeException gdy plik nie jest PDF
+     */
     private void validatePdf(MultipartFile file) throws IOException {
         if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
             throw new InvalidFileTypeException("Dozwolony typ pliku: PDF");

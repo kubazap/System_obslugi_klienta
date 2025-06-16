@@ -16,6 +16,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * Kontroler obsługujący operacje na wiadomościach między pracownikami:
+ * pobieranie rozmów, wysyłanie wiadomości, lista konwersacji oraz lista użytkowników.
+ */
 @RestController
 @RequestMapping("/messages")
 @CrossOrigin(origins = "*")
@@ -28,6 +32,13 @@ public class MessageController {
     private final PracownikRepository pracownikRepository;
     private final NotificationService notificationService;
 
+    /**
+     * Konstruktor MessageController.
+     *
+     * @param messageRepository   repozytorium do operacji na encjach Message
+     * @param pracownikRepository repozytorium do operacji na encjach Pracownik
+     * @param notificationService serwis tworzący powiadomienia dla odbiorców wiadomości
+     */
     public MessageController(
             MessageRepository messageRepository,
             PracownikRepository pracownikRepository,
@@ -37,7 +48,13 @@ public class MessageController {
         this.notificationService = notificationService;
     }
 
-
+    /**
+     * Pobiera listę wiadomości wymienionych między dwoma użytkownikami.
+     *
+     * @param user1Id identyfikator pierwszego użytkownika
+     * @param user2Id identyfikator drugiego użytkownika
+     * @return lista DTO wiadomości posortowanych chronologicznie
+     */
     @GetMapping("/{user1Id}/{user2Id}")
     public List<MessageDto> getConversation(
             @PathVariable Integer user1Id,
@@ -50,6 +67,12 @@ public class MessageController {
                 .toList();
     }
 
+    /**
+     * Wysyła nową wiadomość od nadawcy do odbiorcy, zapisuje ją i tworzy powiadomienie.
+     *
+     * @param messageDto DTO zawierające dane wiadomości (senderId, receiverId, content)
+     * @return zapisana encja Message
+     */
     @PostMapping
     public Message sendMessage(@RequestBody MessageDto messageDto) {
         Message message = new Message();
@@ -78,6 +101,13 @@ public class MessageController {
         return saved;
     }
 
+    /**
+     * Pobiera listę rozmów (ostatnich wiadomości) dla zadanego użytkownika.
+     * Wynik zwraca w formie listy map z informacjami o rozmówcy i treści ostatniej wiadomości.
+     *
+     * @param userId identyfikator użytkownika
+     * @return ResponseEntity zawierające listę map reprezentujących konwersacje
+     */
     @GetMapping("/conversations/{userId}")
     public ResponseEntity<List<Map<String, Object>>> getConversations(
             @PathVariable Integer userId) {
@@ -133,6 +163,11 @@ public class MessageController {
         return ResponseEntity.ok(list);
     }
 
+    /**
+     * Zwraca listę wszystkich pracowników w formie DTO.
+     *
+     * @return ResponseEntity zawierające listę PracownikDto
+     */
     @GetMapping("/users")
     public ResponseEntity<List<PracownikDto>> getAllPracownicy() {
         List<PracownikDto> dtos = pracownikRepository.findAll().stream()
@@ -141,11 +176,23 @@ public class MessageController {
         return ResponseEntity.ok(dtos);
     }
 
+    /**
+     * Pomocnicza metoda pobierająca encję Pracownik i ustawiająca dane przez Consumer.
+     *
+     * @param pracownikId identyfikator pracownika
+     * @param setter      funkcja ustawiająca dane w zależności od kontekstu
+     */
     private void setPracownikData(Integer pracownikId, Consumer<Pracownik> setter) {
         pracownikRepository.findById(pracownikId)
                 .ifPresent(setter);
     }
 
+    /**
+     * Konwertuje encję Message na DTO MessageDto.
+     *
+     * @param message encja wiadomości
+     * @return wypełniony obiekt MessageDto
+     */
     private MessageDto convertToDTO(Message message) {
         var dto = new MessageDto();
         dto.setId(message.getId());
@@ -166,6 +213,12 @@ public class MessageController {
         return dto;
     }
 
+    /**
+     * Konwertuje encję Pracownik na DTO PracownikDto.
+     *
+     * @param p encja pracownika
+     * @return wypełniony obiekt PracownikDto
+     */
     private PracownikDto convertToPracownikDTO(Pracownik p) {
         var dto = new PracownikDto();
         dto.setId(p.getId());

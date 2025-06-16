@@ -1,11 +1,41 @@
 package pl.zapala.system_obslugi_klienta.models;
 
+/**
+ * DTO używane w API do przesyłania danych o powiadomieniach.
+ */
 public class NotificationDto {
+
+    /**
+     * Unikalny identyfikator powiadomienia.
+     */
     private Long id;
+
+    /**
+     * Identyfikator użytkownika, do którego należy powiadomienie.
+     */
     private Integer userId;
+
+    /**
+     * Typ powiadomienia, określający jego kategorię (np. "NEW_MESSAGE").
+     */
     private String type;
+
+    /**
+     * Treść powiadomienia wyświetlana użytkownikowi.
+     */
     private String content;
+
+    /**
+     * Znacznik czasu utworzenia powiadomienia w formacie ISO_OFFSET_DATE_TIME.
+     * Pozwala front-endowi na poprawne wyświetlenie daty i godziny.
+     */
     private String createdAt;
+
+    /**
+     * Flaga wskazująca, czy powiadomienie zostało odczytane.
+     * - true  — powiadomienie odczytane,
+     * - false — nieodczytane.
+     */
     private boolean read;
 
     // Getters & Setters

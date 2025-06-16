@@ -13,11 +13,25 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.context.Context;
 import pl.zapala.system_obslugi_klienta.exception.EmailSendingException;
 
+/**
+ * Serwis odpowiedzialny za asynchroniczne wysyłanie wiadomości e-mail
+ * z kodem TOTP dla pracowników podczas procesu uwierzytelniania wieloskładnikowego.
+ * <p>
+ * Wykorzystuje SpringTemplateEngine do renderowania szablonów HTML oraz
+ * JavaMailSender do wysyłki wiadomości.
+ */
 @Service
 public class EmailService {
+
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
+
+    @Value("${emails.sender_email}")
+    private String senderEmail;
+
+    @Value("${emails.sender_name}")
+    private String senderName;
 
     public EmailService(JavaMailSender javaMailSender,
                         SpringTemplateEngine templateEngine) {
@@ -25,30 +39,38 @@ public class EmailService {
         this.templateEngine = templateEngine;
     }
 
-    @Value("${emails.sender_email}")
-    private String senderEmail;
-    @Value("${emails.sender_name}")
-    private String senderName;
-
+    /**
+     * Wysyła asynchronicznie wiadomość e-mail z kodem TOTP dla użytkownika.
+     *
+     * @param imie           imię pracownika, używane w treści wiadomości
+     * @param receiverEmail  adres e-mail odbiorcy
+     * @param code           wygenerowany kod TOTP
+     * @throws EmailSendingException gdy wystąpi błąd podczas tworzenia lub wysyłania wiadomości
+     */
     @Async
     public void sendTotpEmail(String imie, String receiverEmail, String code) {
         try {
             MimeMessage mime = javaMailSender.createMimeMessage();
             MimeMessageHelper msg = new MimeMessageHelper(mime, true, "UTF-8");
 
+            // Ustawienia nagłówków wiadomości
             msg.setSubject("Kod weryfikacyjny");
             msg.setTo(receiverEmail);
             msg.setFrom(senderEmail, senderName);
 
+            // Przygotowanie modelu dla szablonu Thymeleaf
             Context ctx = new Context();
             ctx.setVariable("pracownikImie", imie);
             ctx.setVariable("codeEmail", code);
 
+            // Renderowanie szablonu HTML
             String html = templateEngine.process("logowanie/e-mail", ctx);
             msg.setText(html, true);
 
+            // Wysłanie wiadomości
             javaMailSender.send(mime);
             logger.info("Confirmation email sent to {}", receiverEmail);
+
         } catch (MessagingException e) {
             throw new EmailSendingException(
                     "Błąd tworzenia MIME dla maila do " + receiverEmail, e);
@@ -58,4 +80,3 @@ public class EmailService {
         }
     }
 }
-
