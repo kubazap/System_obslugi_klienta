@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import pl.zapala.system_obslugi_klienta.controllers.MessageController;
+import pl.zapala.system_obslugi_klienta.models.Message;
 import pl.zapala.system_obslugi_klienta.models.MessageDto;
 
 import pl.zapala.system_obslugi_klienta.models.Pracownik;
@@ -213,6 +214,26 @@ class MessageControllerTest {
             messageController.sendMessage(messageDto);
 
             messageController.getAllPracownicy();
+
+        }
+        @Test
+        @DisplayName("Dodawanie dokumentu bez pliku")
+        void AddonTests() {
+            Message message = new Message();
+            message.getId();
+            message.getReceiverId();
+            message.getSenderFirstName();
+            message.getSenderLastName();
+            message.getReceiverFirstName();
+            message.getReceiverLastName();
+            MessageDto messageDto12 = new MessageDto();
+            messageDto12.getId();
+            messageDto12.getTimestamp();
+            messageDto12.setTimestamp("12");
+            messageDto12.setSenderFirstName("Kacper");
+            messageDto12.setSenderLastName("asd");
+            messageDto12.getReceiverFirstName();
+            messageDto12.getReceiverLastName();
 
         }
 

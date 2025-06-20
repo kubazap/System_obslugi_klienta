@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +37,11 @@ class ValidatorsTest {
     private PostalValidator postalValidator;
     private TimeValidator timeValidator;
     private VisitDateValidator visitDateValidator;
+    private PhoneValidator phoneValidator;
+    private MoneyValidator moneyValidator;
+    private RoomValidator roomValidator;
+    private StreetValidator streetValidator;
+
     @BeforeEach
     void setUp() {
         birthDateValidator = new BirthDateValidator();
@@ -44,6 +50,10 @@ class ValidatorsTest {
         postalValidator = new PostalValidator();
         timeValidator = new TimeValidator();
         visitDateValidator = new VisitDateValidator();
+        phoneValidator = new PhoneValidator();
+        moneyValidator = new MoneyValidator();
+        roomValidator = new RoomValidator();
+        streetValidator = new StreetValidator();
     }
 
     @Nested
@@ -105,12 +115,13 @@ class ValidatorsTest {
 
 
         @ParameterizedTest
+        @NullAndEmptySource
         @ValueSource(strings = {
-                "@gmail.com", // Poprawny PESEL dla osoby urodzonej 14-05-1944
-                "kuba@gmail.", // Poprawny PESEL dla osoby urodzonej 08-07-2002
-                "kuba@.com", // Poprawny PESEL dla osoby urodzonej 05-09-1990
-                "a@g.c", // Poprawny PESEL dla osoby urodzonej 17-12-1980
-                "qweqwcq.com"  // Poprawny PESEL dla osoby urodzonej 02-01-1967
+                "@gmail.com",
+                "kuba@gmail.",
+                "kuba@.com",
+                "a@g.c",
+                "qweqwcq.com"
         })
         @DisplayName("Niepoprawne maile nie powinny przechodzić walidacji")
         void validTextShouldFailValidation(String text) {
@@ -137,6 +148,7 @@ class ValidatorsTest {
         }
 
         @ParameterizedTest
+        @NullAndEmptySource
         @ValueSource(strings = {
                 "123", // Poprawny PESEL dla osoby urodzonej 14-05-1944
                 "Jakub1", // Poprawny PESEL dla osoby urodzonej 08-07-2002
@@ -168,6 +180,7 @@ class ValidatorsTest {
 
 
         @ParameterizedTest
+        @NullAndEmptySource
         @ValueSource(strings = {
                 "12 123", // Poprawny PESEL dla osoby urodzonej 14-05-1944
                 "2-132", // Poprawny PESEL dla osoby urodzonej 08-07-2002
@@ -201,6 +214,7 @@ class ValidatorsTest {
         }
 
         @ParameterizedTest
+        @NullAndEmptySource
         @ValueSource(strings = {
                 "0.00", // Poprawny PESEL dla osoby urodzonej 14-05-1944
                 "12.60", // Poprawny PESEL dla osoby urodzonej 08-07-2002
@@ -256,5 +270,125 @@ class ValidatorsTest {
                     "Nieprawidłowa data powinna nie przejść walidacji: " + date);
         }
     }
+    @Nested
+    @DisplayName("Money Validation")
+    class MoneyTests {
 
+        @ParameterizedTest
+        @ValueSource(strings = {
+                "12 zł",
+                "123 eur",
+                "123 usd",
+        })
+        @DisplayName("Poprawne ilosci powinny przechodzić walidację")
+        void validTextShouldPassValidation(String text) {
+            assertTrue(moneyValidator.isValid(text, null),
+                    "Prawidłowy kod powinien przejść walidację: " + text);
+        }
+
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = {
+                "12",
+                "",
+                "123 pesos",
+        })
+        @DisplayName("Niepoprawne ilosci nie powinny przechodzić walidacji")
+        void validTextShouldFailValidation(String text) {
+            assertFalse(moneyValidator.isValid(text, null),
+                    "Prawidłowy kod powinien przejść walidację: " + text);
+        }
+    }
+    @Nested
+    @DisplayName("Phone Validation")
+    class PhoneTests {
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = {
+                "+48 123 456 789",
+                "+1-800-1234",
+                "",
+        })
+        @DisplayName("Poprawne ilosci powinny przechodzić walidację")
+        void validTextShouldPassValidation(String text) {
+            assertTrue(phoneValidator.isValid(text, null),
+                    "Prawidłowy kod powinien przejść walidację: " + text);
+        }
+
+
+        @ParameterizedTest
+        @ValueSource(strings = {
+                "axd xdd xxx",
+                "123 123 123",
+                "+12;,",
+        })
+        @DisplayName("Niepoprawne ilosci nie powinny przechodzić walidacji")
+        void validTextShouldFailValidation(String text) {
+            assertFalse(phoneValidator.isValid(text, null),
+                    "Prawidłowy kod powinien przejść walidację: " + text);
+        }
+    }
+    @Nested
+    @DisplayName("Room Validation")
+    class RoomTests {
+
+        @ParameterizedTest
+        @ValueSource(strings = {
+                "1.12 DH",
+                "12",
+                "Sala 24",
+        })
+        @DisplayName("Poprawne ilosci powinny przechodzić walidację")
+        void validTextShouldPassValidation(String text) {
+            assertTrue(roomValidator.isValid(text, null),
+                    "Prawidłowy kod powinien przejść walidację: " + text);
+        }
+
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = {
+                "Sala $",
+                "sala 1/2",
+                "",
+        })
+        @DisplayName("Niepoprawne ilosci nie powinny przechodzić walidacji")
+        void validTextShouldFailValidation(String text) {
+            assertFalse(roomValidator.isValid(text, null),
+                    "Prawidłowy kod powinien przejść walidację: " + text);
+        }
+    }
+
+    @Nested
+    @DisplayName("Street Validation")
+    class StreetTests {
+
+        @ParameterizedTest
+        @ValueSource(strings = {
+                "Słoneczna 2, Kielce",
+                "Piekoszów 21",
+                "Kielecka 2/12 ",
+        })
+        @DisplayName("Poprawne ilosci powinny przechodzić walidację")
+        void validTextShouldPassValidation(String text) {
+            assertTrue(streetValidator.isValid(text, null),
+                    "Prawidłowy kod powinien przejść walidację: " + text);
+        }
+
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = {
+                "   ",       // tylko spacje
+                "{Kielecka}",
+                "1=1",
+        })
+        @DisplayName("Niepoprawne ilosci nie powinny przechodzić walidacji")
+        void validTextShouldFailValidation(String text) {
+            assertFalse(streetValidator.isValid(text, null),
+                    "Prawidłowy kod powinien przejść walidację: " + text);
+        }
+    }
 }

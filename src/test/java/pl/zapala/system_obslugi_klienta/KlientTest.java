@@ -9,12 +9,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import pl.zapala.system_obslugi_klienta.models.KlientDto;
+import pl.zapala.system_obslugi_klienta.models.*;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.test.context.TestPropertySource;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -141,5 +142,28 @@ public class KlientTest {
             klientDto.setUlicaNumerDomu(address);
             assertTrue(klientDto.getUlicaNumerDomu().trim().isEmpty());
         }
+    }
+    @Nested
+    @DisplayName("Test wizyt")
+    class WizytyTest {
+        @Test
+        @DisplayName("Get set wizyty")
+        void shouldSetAndGetWizyty() {
+            // given
+            Klient klient = new Klient();
+            klient.setId(1);
+            Wizyta wizyta = new Wizyta();
+            List<Wizyta> wizyty = List.of(wizyta);
+
+            // when
+            klient.setWizyty(wizyty);
+            List<Wizyta> result = klient.getWizyty();
+
+            // then
+            assertNotNull(result, "Lista nie powinna być nullem");
+            assertEquals(1, result.size(), "Lista powinna zawierać jedną wizytę");
+            assertSame(wizyta, result.get(0), "Wizyta powinna być tą samą instancją");
+        }
+
     }
 }

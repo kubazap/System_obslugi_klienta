@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import pl.zapala.system_obslugi_klienta.models.Wizyta;
 import pl.zapala.system_obslugi_klienta.models.WizytaDto;
 
 import java.sql.Date;
@@ -29,11 +30,11 @@ import static org.junit.jupiter.api.Assertions.*;
         "emails.sender_email=dummy@example.com"})
 public class WizytaTest {
 
-    private WizytaDto wizyta;
+    private WizytaDto wizytaDto;
 
     @BeforeEach
     void setUp() {
-        wizyta = new WizytaDto();
+        wizytaDto = new WizytaDto();
     }
 
     @Nested
@@ -43,8 +44,8 @@ public class WizytaTest {
         @ParameterizedTest
         @ValueSource(strings = {"Stypendium socjalne", "umowa o prace", "cośtam", "umowa kupna-sprzedaży"})
         void shouldAcceptValidNames(String name) {
-            wizyta.setPokoj(name);
-            assertEquals(name, wizyta.getPokoj());
+            wizytaDto.setPokoj(name);
+            assertEquals(name, wizytaDto.getPokoj());
         }
     }
 
@@ -55,22 +56,22 @@ public class WizytaTest {
         @Test
         void shouldAcceptValidDate() {
             LocalDate valid = LocalDate.now().plusDays(1);
-            wizyta.setDataWizyty(Date.valueOf(valid));
-            assertEquals(valid, wizyta.getDataWizyty().toLocalDate());
+            wizytaDto.setDataWizyty(Date.valueOf(valid));
+            assertEquals(valid, wizytaDto.getDataWizyty().toLocalDate());
         }
 
         @Test
         void shouldRejectDateInFuture() {
             LocalDate past = LocalDate.now().minusDays(1);
-            wizyta.setDataWizyty(Date.valueOf(past));
-            assertTrue(wizyta.getDataWizyty().toLocalDate().isBefore(LocalDate.now()));
+            wizytaDto.setDataWizyty(Date.valueOf(past));
+            assertTrue(wizytaDto.getDataWizyty().toLocalDate().isBefore(LocalDate.now()));
         }
 
         @Test
         void shouldRejectDateTooOld() {
             LocalDate tooOld = LocalDate.now().minusYears(101);
-            wizyta.setDataWizyty(Date.valueOf(tooOld));
-            assertTrue(wizyta.getDataWizyty().toLocalDate().isBefore(LocalDate.now().minusYears(100)));
+            wizytaDto.setDataWizyty(Date.valueOf(tooOld));
+            assertTrue(wizytaDto.getDataWizyty().toLocalDate().isBefore(LocalDate.now().minusYears(100)));
         }
     }
 
@@ -81,8 +82,10 @@ public class WizytaTest {
         @ParameterizedTest
         @ValueSource(strings = {"12.00", "13.00", "14.00"})
         void shouldAcceptType(String name) {
-            wizyta.setGodzina(name);
-            assertEquals(name, wizyta.getGodzina());
+            Wizyta wizyta = new Wizyta();
+            wizyta.setId(1);
+            wizytaDto.setGodzina(name);
+            assertEquals(name, wizytaDto.getGodzina());
         }
     }
 

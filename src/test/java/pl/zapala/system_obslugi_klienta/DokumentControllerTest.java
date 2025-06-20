@@ -559,13 +559,15 @@ class DokumentControllerTest {
             dokument = dokumentRepository.save(dokument);
 
             Plik plik = new Plik();
+            plik.getDataDodania();
+            plik.getDokument();
             plik.setDokument(dokument);
             plik.setNazwaPliku("plik123.pdf");
             plik.setDataDodania(new java.sql.Date(System.currentTimeMillis()));
             plik = plikRepository.save(plik);
 
             ResponseEntity<Object> response = dokumentController.pobierzPlik(plik.getId());
-
+            plik.setId(1);
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
             assertNull(response.getBody());
 
