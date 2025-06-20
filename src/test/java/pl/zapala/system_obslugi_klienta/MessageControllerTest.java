@@ -10,15 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import pl.zapala.system_obslugi_klienta.controllers.MessageController;
 import pl.zapala.system_obslugi_klienta.models.MessageDto;
-import pl.zapala.system_obslugi_klienta.models.Message;
+
+import pl.zapala.system_obslugi_klienta.models.Pracownik;
 import pl.zapala.system_obslugi_klienta.models.PracownikDto;
 import pl.zapala.system_obslugi_klienta.repositories.MessageRepository;
+import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
 
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
@@ -37,43 +34,185 @@ class MessageControllerTest {
     private MessageController messageController;
 
     @Autowired
-    private MessageRepository messageRepository;
+    private PracownikRepository pracownikRepository;
 
     private MessageDto messageDto;
 
     @BeforeEach
     void setUp() {
-        messageRepository.deleteAll();
 
-        messageDto = new MessageDto();
-        messageDto.setId(1L);
-        messageDto.setSenderId(1);
-        messageDto.setSenderFirstName("Kacper");
-        messageDto.setSenderLastName("Wojtyra");
-        messageDto.setReceiverId(2);
-        messageDto.setReceiverFirstName("Jakub");
-        messageDto.setReceiverLastName("Zapala");
-        messageDto.setContent("Hello");
     }
 
     @Nested
-    @DisplayName("Operacje na dokumentach")
+    @DisplayName("Operacje na wiadomościach")
     class DokumentTests {
+
+        @Test
+        @DisplayName("Lista wiadomości")
+        void ShouldList() {
+            Pracownik pracownik = new Pracownik();
+            Pracownik pracownik2 = new Pracownik();
+
+            pracownik.setImie("Jan");
+            pracownik.setNazwisko("Kowalski");
+
+            pracownik2.setImie("Janek");
+            pracownik2.setNazwisko("Nowak");
+            pracownikRepository.save(pracownik);
+            pracownikRepository.save(pracownik2);
+
+            messageDto = new MessageDto();
+            messageDto.setId(1L);
+            messageDto.setSenderId(pracownik.getId());
+            messageDto.setSenderFirstName("Kacper");
+            messageDto.setSenderLastName("Wojtyra");
+            messageDto.setReceiverId(pracownik2.getId());
+            messageDto.setReceiverFirstName("Jakub");
+            messageDto.setReceiverLastName("Zapala");
+            messageDto.setContent("Hello");
+
+            messageDto = new MessageDto();
+            messageDto.setId(2L);
+            messageDto.setSenderId(pracownik2.getId());
+            messageDto.setReceiverFirstName("Jakub");
+            messageDto.setReceiverLastName("Zapala");
+            messageDto.setReceiverId(pracownik.getId());
+            messageDto.setSenderFirstName("Kacper");
+            messageDto.setSenderLastName("Wojtyra");
+            messageDto.setContent("Hello");
+
+            messageController.sendMessage(messageDto);
+
+            PracownikDto sender = new PracownikDto();
+            sender.setId(pracownik.getId());
+            sender.setImie("Jan");
+            sender.setNazwisko("Kowalski");
+            PracownikDto receiver = new PracownikDto();
+            receiver.setId(pracownik.getId());
+            receiver.setImie("Anna");
+            receiver.setNazwisko("Nowak");
+            messageController.getConversation(sender.getId(),receiver.getId());
+
+        }
 
         @Test
         @DisplayName("Dodawanie dokumentu bez pliku")
         void sendSuccessfully() {
-            Message message= new Message();
-            message.setSenderId(1);
-            message.setSenderFirstName("Kacper");
-            message.setSenderLastName("Wojtyra");
-            message.setReceiverId(2);
-            message.setReceiverFirstName("Jakub");
-            message.setReceiverLastName("Zapala");
-            message.setContent("Hello");
-            PracownikDto sender = new PracownikDto(1, "Jan", "Kowalski");
-            PracownikDto receiver = new PracownikDto(2, "Anna", "Nowak");
+            Pracownik pracownik = new Pracownik();
+            Pracownik pracownik2 = new Pracownik();
+
+            pracownik.setImie("Jan");
+            pracownik.setNazwisko("Kowalski");
+
+            pracownik2.setImie("Janek");
+            pracownik2.setNazwisko("Nowak");
+            pracownikRepository.save(pracownik);
+            pracownikRepository.save(pracownik2);
+
+            messageDto = new MessageDto();
+            messageDto.setId(1L);
+            messageDto.setSenderId(pracownik.getId());
+            messageDto.setSenderFirstName("Kacper");
+            messageDto.setSenderLastName("Wojtyra");
+            messageDto.setReceiverId(pracownik2.getId());
+            messageDto.setReceiverFirstName("Jakub");
+            messageDto.setReceiverLastName("Zapala");
+            messageDto.setContent("Hello");
+
+            messageDto = new MessageDto();
+            messageDto.setId(2L);
+            messageDto.setSenderId(pracownik2.getId());
+            messageDto.setReceiverFirstName("Jakub");
+            messageDto.setReceiverLastName("Zapala");
+            messageDto.setReceiverId(pracownik.getId());
+            messageDto.setSenderFirstName("Kacper");
+            messageDto.setSenderLastName("Wojtyra");
+            messageDto.setContent("Hello");
+
             messageController.sendMessage(messageDto);
+
+        }
+
+        @Test
+        @DisplayName("Lista wiadomości")
+        void ShouldList2() {
+            Pracownik pracownik = new Pracownik();
+            Pracownik pracownik2 = new Pracownik();
+
+            pracownik.setImie("Jan");
+            pracownik.setNazwisko("Kowalski");
+
+            pracownik2.setImie("Janek");
+            pracownik2.setNazwisko("Nowak");
+            pracownikRepository.save(pracownik);
+            pracownikRepository.save(pracownik2);
+
+            messageDto = new MessageDto();
+            messageDto.setId(1L);
+            messageDto.setSenderId(pracownik.getId());
+            messageDto.setSenderFirstName("Kacper");
+            messageDto.setSenderLastName("Wojtyra");
+            messageDto.setReceiverId(pracownik2.getId());
+            messageDto.setReceiverFirstName("Jakub");
+            messageDto.setReceiverLastName("Zapala");
+            messageDto.setContent("Hello");
+
+            messageDto = new MessageDto();
+            messageDto.setId(2L);
+            messageDto.setSenderId(pracownik2.getId());
+            messageDto.setReceiverFirstName("Jakub");
+            messageDto.setReceiverLastName("Zapala");
+            messageDto.setReceiverId(pracownik.getId());
+            messageDto.setSenderFirstName("Kacper");
+            messageDto.setSenderLastName("Wojtyra");
+            messageDto.setContent("Hello");
+
+            messageController.sendMessage(messageDto);
+            PracownikDto sender = new PracownikDto();
+            sender.setId(pracownik.getId());
+            sender.setImie("Jan");
+            sender.setNazwisko("Kowalski");
+            messageController.getConversations(sender.getId());
+
+        }
+
+        @Test
+        @DisplayName("Dodawanie dokumentu bez pliku")
+        void GetPracownicy() {
+            Pracownik pracownik = new Pracownik();
+            Pracownik pracownik2 = new Pracownik();
+
+            pracownik.setImie("Jan");
+            pracownik.setNazwisko("Kowalski");
+
+            pracownik2.setImie("Janek");
+            pracownik2.setNazwisko("Nowak");
+            pracownikRepository.save(pracownik);
+            pracownikRepository.save(pracownik2);
+
+            messageDto = new MessageDto();
+            messageDto.setId(1L);
+            messageDto.setSenderId(pracownik.getId());
+            messageDto.setSenderFirstName("Kacper");
+            messageDto.setSenderLastName("Wojtyra");
+            messageDto.setReceiverId(pracownik2.getId());
+            messageDto.setReceiverFirstName("Jakub");
+            messageDto.setReceiverLastName("Zapala");
+            messageDto.setContent("Hello");
+
+            messageDto = new MessageDto();
+            messageDto.setId(2L);
+            messageDto.setSenderId(pracownik2.getId());
+            messageDto.setReceiverFirstName("Jakub");
+            messageDto.setReceiverLastName("Zapala");
+            messageDto.setReceiverId(pracownik.getId());
+            messageDto.setSenderFirstName("Kacper");
+            messageDto.setSenderLastName("Wojtyra");
+            messageDto.setContent("Hello");
+
+            messageController.sendMessage(messageDto);
+
+            messageController.getAllPracownicy();
 
         }
 
