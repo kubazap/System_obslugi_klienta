@@ -95,7 +95,7 @@ public class MessageController {
         notificationService.createNotification(
                 message.getReceiverId(),
                 "NEW_MESSAGE",
-                "You have a new message from " + message.getSenderFirstName() + " " + message.getSenderLastName()
+                "Nowa wiadomość od " + message.getSenderFirstName() + " " + message.getSenderLastName()
         );
 
         return saved;
