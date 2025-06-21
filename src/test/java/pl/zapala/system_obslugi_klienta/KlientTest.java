@@ -10,8 +10,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import pl.zapala.system_obslugi_klienta.models.*;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.test.context.TestPropertySource;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -45,7 +43,7 @@ public class KlientTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"Anna", "Kamil", "Jan-Kowalski", "Maria Nowak"})
-        void shouldAcceptValidNames(String name) {
+        void ValidNames(String name) {
             klientDto.setImie(name);
             klientDto.setNazwisko(name);
             assertEquals(name, klientDto.getImie());
@@ -54,7 +52,7 @@ public class KlientTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"", "1sd2", "123", "An@na", "John123"})
-        void shouldRejectInvalidNames(String name) {
+        void InvalidNames(String name) {
             klientDto.setImie(name);
             assertFalse(name.matches("^[A-ZĄĆĘŁŃÓŚŹŻa-ząćęłńóśźż\\- ]+$"));
         }
@@ -65,21 +63,21 @@ public class KlientTest {
     class BirthDateValidation {
 
         @Test
-        void shouldAcceptValidDateWithin100Years() {
+        void ValidDate() {
             LocalDate valid = LocalDate.now().minusYears(25);
             klientDto.setDataUrodzenia(Date.valueOf(valid));
             assertEquals(valid, klientDto.getDataUrodzenia().toLocalDate());
         }
 
         @Test
-        void shouldRejectDateInFuture() {
+        void InvalidDateInFuture() {
             LocalDate future = LocalDate.now().plusDays(1);
             klientDto.setDataUrodzenia(Date.valueOf(future));
             assertTrue(klientDto.getDataUrodzenia().toLocalDate().isAfter(LocalDate.now()));
         }
 
         @Test
-        void shouldRejectDateTooOld() {
+        void InvalidDateTooOld() {
             LocalDate tooOld = LocalDate.now().minusYears(101);
             klientDto.setDataUrodzenia(Date.valueOf(tooOld));
             assertTrue(klientDto.getDataUrodzenia().toLocalDate().isBefore(LocalDate.now().minusYears(100)));
@@ -92,14 +90,14 @@ public class KlientTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"00-001", "99-999", "12-345"})
-        void shouldAcceptValidPostal(String code) {
+        void ValidPostal(String code) {
             klientDto.setKodPocztowy(code);
             assertTrue(code.matches("\\d{2}-\\d{3}"));
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"00001", "00/001", "00-0011", "000-01", "abcd"})
-        void shouldRejectInvalidPostal(String code) {
+        void InvalidPostal(String code) {
             klientDto.setKodPocztowy(code);
             assertFalse(code.matches("\\d{2}-\\d{3}"));
         }
@@ -111,14 +109,14 @@ public class KlientTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"test@example.com", "user.name@domain.pl", "kontakt@firma.org"})
-        void shouldAcceptValidEmails(String email) {
+        void ValidEmails(String email) {
             klientDto.setEmail(email);
             assertTrue(email.contains("@"));
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"test@", "@example.com", "user@.com", "plainaddress"})
-        void shouldRejectInvalidEmails(String email) {
+        void InvalidEmails(String email) {
             klientDto.setEmail(email);
             assertFalse(email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"));
         }
@@ -130,7 +128,7 @@ public class KlientTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"ul. Kwiatowa 15", "Nowa 3A", "Szeroka 7/2"})
-        void shouldAcceptNonEmpty(String address) {
+        void ValidStreer(String address) {
             klientDto.setUlicaNumerDomu(address);
             assertNotNull(klientDto.getUlicaNumerDomu());
             assertFalse(klientDto.getUlicaNumerDomu().trim().isEmpty());
@@ -138,32 +136,26 @@ public class KlientTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"", "   "})
-        void shouldRejectEmpty(String address) {
+        void InValidStreet(String address) {
             klientDto.setUlicaNumerDomu(address);
             assertTrue(klientDto.getUlicaNumerDomu().trim().isEmpty());
         }
     }
     @Nested
-    @DisplayName("Test wizyt")
+    @DisplayName("Test uzupełniający wizyty")
     class WizytyTest {
         @Test
         @DisplayName("Get set wizyty")
         void shouldSetAndGetWizyty() {
-            // given
             Klient klient = new Klient();
             klient.setId(1);
             Wizyta wizyta = new Wizyta();
             List<Wizyta> wizyty = List.of(wizyta);
-
-            // when
             klient.setWizyty(wizyty);
             List<Wizyta> result = klient.getWizyty();
-
-            // then
-            assertNotNull(result, "Lista nie powinna być nullem");
-            assertEquals(1, result.size(), "Lista powinna zawierać jedną wizytę");
-            assertSame(wizyta, result.get(0), "Wizyta powinna być tą samą instancją");
+            assertNotNull(result);
+            assertEquals(1, result.size());
+            assertSame(wizyta, result.get(0));
         }
-
     }
 }

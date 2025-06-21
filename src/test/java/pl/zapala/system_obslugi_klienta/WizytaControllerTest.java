@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -57,18 +58,32 @@ public class WizytaControllerTest {
 
     private WizytaDto wizytaDto;
 
+    private Wizyta wizyta;
+    private Klient klient;
+
     @BeforeEach
     void setUp() {
         klientRepository.deleteAll();
         wizytaRepository.deleteAll();
 
-        klientDto = new KlientDto();
-        klientDto.setImie("Anna");
-        klientDto.setNazwisko("Kowalska");
-        klientDto.setDataUrodzenia(Date.valueOf(LocalDate.of(1995, 5, 10)));
-        klientDto.setEmail("anna@example.com");
-        klientDto.setKodPocztowy("00-001");
-        klientDto.setUlicaNumerDomu("ul. Kwiatowa 12");
+        klient = new Klient();
+        klient.setImie("Anna");
+        klient.setNazwisko("Kowalska");
+        klient.setDataUrodzenia(Date.valueOf(LocalDate.of(1995, 5, 10)));
+        klient.setEmail("anna@example.com");
+        klient.setKodPocztowy("00-001");
+        klient.setUlicaNumerDomu("ul. Kwiatowa 12");
+        klientRepository.save(klient);
+
+        wizyta = new Wizyta();
+        wizyta.setDataWizyty(Date.valueOf(LocalDate.now()));
+        wizyta.setGodzina("10.00");
+        wizyta.setPokoj("101");
+        wizyta.setCzyOplacona(false);
+        wizyta.setNaleznosc("100 zł");
+        wizyta.setSposobPlatnosci("gotówka");
+        wizyta.setKlient(klient);
+        wizytaRepository.save(wizyta);
     }
 
     @Nested
@@ -112,195 +127,195 @@ public class WizytaControllerTest {
         }
 
         @Test
-        @DisplayName("Pobranie wizyt")
+        @DisplayName("Pobranie wizyt(model)")
         void shouldGetWizyty() {
             ExtendedModelMap model = new ExtendedModelMap();
-            wizytaController.getWizyty(model);
+            String viewName = wizytaController.getWizyty(model);
+            assertEquals("wizyty/index", viewName);
         }
 
         @Test
-        @DisplayName("Stworzenie wizyty")
-        void shouldCreateWizyta() {
+        @DisplayName("Stworzenie wizyty(model)")
+        void CreateWizytaModel() {
             ExtendedModelMap model = new ExtendedModelMap();
-            wizytaController.createWizyta(model);
+            String viewName = wizytaController.createWizyta(model);
+            assertEquals("wizyty/dodaj", viewName);
         }
 
         @Test
-        @DisplayName("Stworzenie wizyty2")
-        void shouldCreateWizyta2() {
+        @DisplayName("Stworzenie wizyty - poprawne")
+        void CreateWizytaSuccess() {
             BindingResult result = mock(BindingResult.class);
-            WizytaDto wizytaDto = new WizytaDto();
-            wizytaController.createWizyta(wizytaDto,result);
+
+            wizytaDto = new WizytaDto();
+            wizytaDto.setGodzina("10.00");
+            wizytaDto.setPokoj("12 C");
+            wizytaDto.setNaleznosc("182 zł");
+            wizytaDto.setKlientId(klient.getId());
+            String viewName = wizytaController.createWizyta(wizytaDto, result);
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+            assertEquals("redirect:/wizyty", viewName);
+            assertEquals("10.00",Wizyty.get(1).getGodzina());
+            assertEquals("182 zł",Wizyty.get(1).getNaleznosc());
         }
         @Test
-        @DisplayName("Stworzenie wizyty z Errors")
-        void shouldCreateWizytaWithError() {
+        @DisplayName("Stworzenie wizyty - bez klienta")
+        void CreateWizytaNoKlient() {
+            BindingResult result = mock(BindingResult.class);
+            wizytaDto = new WizytaDto();
+            wizytaDto.setGodzina("10.00");
+            wizytaDto.setPokoj("12 C");
+            wizytaDto.setNaleznosc("182 zł");
+            String viewName = wizytaController.createWizyta(wizytaDto,result);
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+
+            assertEquals("redirect:/wizyty", viewName);
+            assertEquals(null, Wizyty.get(1).getKlient());
+        }
+
+        @Test
+        @DisplayName("Stworzenie wizyty - bez klienta, ale z id")
+        void CreateWizytaNoKlientButWithId() {
+            BindingResult result = mock(BindingResult.class);
+            wizytaDto = new WizytaDto();
+            wizytaDto.setGodzina("10.00");
+            wizytaDto.setPokoj("12 C");
+            wizytaDto.setNaleznosc("182 zł");
+            wizytaDto.setKlientId(1233);
+            String viewName = wizytaController.createWizyta(wizytaDto,result);
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+
+            assertEquals("redirect:/wizyty", viewName);
+            assertEquals(null, Wizyty.get(1).getKlient());
+        }
+        @Test
+        @DisplayName("Stworzenie wizyty - Errors")
+        void CreateWizytaWithErrors() {
             BindingResult result = mock(BindingResult.class);
             when(result.hasErrors()).thenReturn(true);
 
-            WizytaDto wizytaDto = new WizytaDto();
-            String redirect = wizytaController.createWizyta(wizytaDto, result);
-
+            wizytaDto = new WizytaDto();
+            String viewName = wizytaController.createWizyta(wizytaDto, result);
+            assertEquals("wizyty/dodaj", viewName);
         }
 
         @Test
-        @DisplayName("Stworzenie wizyty dobrze")
-        void shouldCreateWizytaWithKlientId() {
-            BindingResult result = mock(BindingResult.class);
-            Klient klient = new Klient();
-            klientRepository.save(klient);
-
-            WizytaDto wizytaDto = new WizytaDto();
-            wizytaDto.setKlientId(klient.getId());
-            String redirect = wizytaController.createWizyta(wizytaDto, result);
-
-        }
-
-        @Test
-        @DisplayName("Edycja wizyty")
-        void shoulEditWizyta() {
-            WizytaDto wizytaDto = new WizytaDto();
-            ExtendedModelMap model = new ExtendedModelMap();
-            wizytaController.editWizyta(model,1);
-        }
-
-        @Test
-        @DisplayName("Edycja wizyty nie null i klient nie null")
+        @DisplayName("Edycja wizyty(model) - poprawne")
         void shoulEditWizytaNotNull() {
-            Klient klient = new Klient();
-            klientRepository.save(klient);
-
-            Wizyta wizyta = new Wizyta();
-            wizyta.setDataWizyty(Date.valueOf(LocalDate.now()));
-            wizyta.setGodzina("10.00");
-            wizyta.setPokoj("101");
-            wizyta.setCzyOplacona(false);
-            wizyta.setNaleznosc("100 zł");
-            wizyta.setSposobPlatnosci("gotówka");
-            wizyta.setKlient(klient);
-            wizytaRepository.save(wizyta);
 
             ExtendedModelMap model = new ExtendedModelMap();
-            wizytaController.editWizyta(model,wizyta.getId());
+            String viewName = wizytaController.editWizyta(model,wizyta.getId());
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+
+            assertEquals("wizyty/edytuj", viewName);
+            assertEquals("100 zł", Wizyty.get(0).getNaleznosc());
+            assertTrue(Wizyty.get(0).getKlient()!=null);
+        }
+        @Test
+        @DisplayName("Edycja wizyty(model) - brak wizyty")
+        void shoulEditWizyta() {
+            wizytaDto = new WizytaDto();
+            ExtendedModelMap model = new ExtendedModelMap();
+            String viewName = wizytaController.editWizyta(model,11);
+            assertEquals("redirect:/wizyty", viewName);
         }
 
         @Test
-        @DisplayName("Edycja wizyty nie null i klient null")
+        @DisplayName("Edycja wizyty(model) - bez klienta")
         void shoulEditWizytaNotNullKlientNull() {
-            Wizyta wizyta = new Wizyta();
-            wizyta.setDataWizyty(Date.valueOf(LocalDate.now()));
-            wizyta.setGodzina("10.00");
-            wizyta.setPokoj("101");
-            wizyta.setCzyOplacona(false);
-            wizyta.setNaleznosc("100 zł");
-            wizyta.setSposobPlatnosci("gotówka");
-            wizytaRepository.save(wizyta);
-
             ExtendedModelMap model = new ExtendedModelMap();
-            wizytaController.editWizyta(model,wizyta.getId());
+            wizyta.setKlient(null);
+            wizytaRepository.save(wizyta);
+            String viewName = wizytaController.editWizyta(model,wizyta.getId());
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+
+            assertEquals("wizyty/edytuj", viewName);
+            assertEquals("100 zł", Wizyty.get(0).getNaleznosc());
+            assertTrue(Wizyty.get(0).getKlient()==null);
         }
 
         @Test
-        @DisplayName("Edycja wizyty2")
-        void shoulEditWizyta2() {
-            BindingResult result = mock(BindingResult.class);
-            WizytaDto wizytaDto = new WizytaDto();
-            ExtendedModelMap model = new ExtendedModelMap();
-            wizytaController.editWizyta(model,1,wizytaDto,result);
-        }
-
-        @Test
-        @DisplayName("Edycja wizyty2 not null")
-        void shoulEditWizyta2NotNull() {
-            Wizyta wizyta = new Wizyta();
-            wizytaRepository.save(wizyta);
-            Klient klient = new Klient();
-            klientRepository.save(klient);
-
+        @DisplayName("Edycja wizyty - poprawna")
+        void shoulEditWizyta2NotNullKlientNull() {
             ExtendedModelMap model = new ExtendedModelMap();
             BindingResult result = mock(BindingResult.class);
 
             WizytaDto wizytaDto = new WizytaDto();
             wizytaDto.setDataWizyty(Date.valueOf(LocalDate.now()));
-            wizytaDto.setGodzina("10.00");
-            wizytaDto.setPokoj("101");
+            wizytaDto.setGodzina("11.00");
+            wizytaDto.setPokoj("101 A");
             wizytaDto.setCzyOplacona(false);
-            wizytaDto.setNaleznosc("100 zł");
+            wizytaDto.setNaleznosc("200 zł");
             wizytaDto.setSposobPlatnosci("gotówka");
-            wizytaDto.setKlientId(klient.getId());
-            wizytaController.editWizyta(model,wizyta.getId(),wizytaDto,result);
+            wizytaDto.setKlientId(wizyta.getKlient().getId());
+            String viewName =  wizytaController.editWizyta(model,wizyta.getId(),wizytaDto,result);
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+            assertEquals("redirect:/wizyty", viewName);
+            assertEquals("200 zł", Wizyty.get(0).getNaleznosc());
+            assertFalse(Wizyty.get(0).getCzyOplacona());
+            assertTrue(Wizyty.get(0).getKlient()!=null);
         }
+
         @Test
-        @DisplayName("Edycja wizyty2 not null has errors")
+        @DisplayName("Edycja wizyty - brak wizyty")
+        void shoulEditWizyta2() {
+            ExtendedModelMap model = new ExtendedModelMap();
+            BindingResult result = mock(BindingResult.class);
+
+            WizytaDto wizytaDto = new WizytaDto();
+            String viewName =  wizytaController.editWizyta(model,123,wizytaDto,result);
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+            assertEquals("redirect:/wizyty", viewName);
+        }
+
+        @Test
+        @DisplayName("Edycja wizyty - Errors")
         void shoulEditWizyta2NotNullHasErrors() {
-            Wizyta wizyta = new Wizyta();
-            wizytaRepository.save(wizyta);
-
-
             ExtendedModelMap model = new ExtendedModelMap();
             BindingResult result = mock(BindingResult.class);
             when(result.hasErrors()).thenReturn(true);
 
             WizytaDto wizytaDto = new WizytaDto();
-            wizytaDto.setDataWizyty(Date.valueOf(LocalDate.now()));
-            wizytaDto.setGodzina("10.00");
-            wizytaDto.setPokoj("101");
-            wizytaDto.setCzyOplacona(false);
-            wizytaDto.setNaleznosc("100 zł");
-            wizytaDto.setSposobPlatnosci("gotówka");
-            wizytaController.editWizyta(model,wizyta.getId(),wizytaDto,result);
+            String viewName =  wizytaController.editWizyta(model,wizyta.getId(),wizytaDto,result);
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+            assertEquals("wizyty/edytuj", viewName);
         }
 
         @Test
-        @DisplayName("Edycja wizyty2 not null")
-        void shoulEditWizyta2NotNullKlientNull() {
-            Wizyta wizyta = new Wizyta();
-            wizytaRepository.save(wizyta);
-
+        @DisplayName("Edycja wizyty - brak klienta")
+        void shoulEditWizyta2NotNull() {
             ExtendedModelMap model = new ExtendedModelMap();
             BindingResult result = mock(BindingResult.class);
 
             WizytaDto wizytaDto = new WizytaDto();
             wizytaDto.setDataWizyty(Date.valueOf(LocalDate.now()));
-            wizytaDto.setGodzina("10.00");
-            wizytaDto.setPokoj("101");
+            wizytaDto.setGodzina("11.00");
+            wizytaDto.setPokoj("101 A");
             wizytaDto.setCzyOplacona(false);
-            wizytaDto.setNaleznosc("100 zł");
+            wizytaDto.setNaleznosc("200 zł");
             wizytaDto.setSposobPlatnosci("gotówka");
-            wizytaController.editWizyta(model,wizyta.getId(),wizytaDto,result);
+            String viewName =  wizytaController.editWizyta(model,wizyta.getId(),wizytaDto,result);
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+            assertEquals("redirect:/wizyty", viewName);
+            assertEquals("200 zł", Wizyty.get(0).getNaleznosc());
+            assertFalse(Wizyty.get(0).getCzyOplacona());
+            assertTrue(Wizyty.get(0).getKlient()==null);
         }
+
         @Test
-        @DisplayName("Usuń wizyte")
+        @DisplayName("Usuń wizyte - poprawnie")
         void shoulDeleteWizyta() {
-
-            wizytaController.deleteWizyta(1);
+            String viewName =  wizytaController.deleteWizyta(wizyta.getId());
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+            assertTrue(Wizyty.isEmpty());
         }
 
         @Test
-        @DisplayName("Usuwa wizytę z repozytorium")
+        @DisplayName("Usuwa wizytę - nie znaleziono wizyty")
         void shouldDeleteWizyta2() {
-            // given
-            Klient klient = new Klient();
-            klientRepository.save(klient);
-
-            Wizyta wizyta = new Wizyta();
-            wizyta.setDataWizyty(Date.valueOf(LocalDate.now()));
-            wizyta.setGodzina("10:00"); // jeśli to String
-            wizyta.setPokoj("101");
-            wizyta.setCzyOplacona(false);
-            wizyta.setNaleznosc("100.00"); // jeśli to String
-            wizyta.setSposobPlatnosci("gotówka");
-            wizyta.setUwagi("Testowa wizyta");
-            wizyta.setKlient(klient);
-
-            wizytaRepository.save(wizyta);
-            Integer id = wizyta.getId();
-
-            // when
-            wizytaController.deleteWizyta(id);
-
-            // then
-            assertFalse(wizytaRepository.findById(id).isPresent());
+            String viewName =  wizytaController.deleteWizyta(123);
+            List<Wizyta> Wizyty = wizytaRepository.findAll();
+            assertFalse(Wizyty.isEmpty());
         }
     }
 }

@@ -5,8 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -16,11 +14,7 @@ import pl.zapala.system_obslugi_klienta.exception.CodeGenerationFailedException;
 import pl.zapala.system_obslugi_klienta.exception.ControllerOperationException;
 import pl.zapala.system_obslugi_klienta.exception.EmailSendingException;
 import pl.zapala.system_obslugi_klienta.exception.MfaVerificationException;
-import pl.zapala.system_obslugi_klienta.models.KlientDto;
 import dev.samstevens.totp.exceptions.CodeGenerationException;
-import java.sql.Date;
-import java.time.LocalDate;
-import pl.zapala.system_obslugi_klienta.exception.MfaVerificationException;
 import pl.zapala.system_obslugi_klienta.security.MfaExceptionHandler;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,7 +49,7 @@ public class ExceptionsTest {
         }
 
         @Test
-        void shouldCreateExceptionWithMessageAndThrowableCause() {
+        void shouldCreateExceptionWithMessageAndCause() {
             Throwable cause = new RuntimeException("Przyczyna");
             EmailSendingException exception = new EmailSendingException("Błąd wysyłania", cause);
 
@@ -84,7 +78,7 @@ public class ExceptionsTest {
         }
 
         @Test
-        void shouldCreateExceptionWithMessageAndThrowableCause() {
+        void shouldCreateExceptionWithMessageAndCause() {
             Throwable cause = new RuntimeException("Przyczyna");
             CodeGenerationFailedException exception = new CodeGenerationFailedException("Błąd generowania kodu", cause);
 
@@ -94,11 +88,9 @@ public class ExceptionsTest {
 
         @Test
         void shouldCreateExceptionWithCodeGenerationException() {
-            CodeGenerationException totpCause =
-                    new CodeGenerationException("Błąd TOTP", new RuntimeException("root cause"));
+            CodeGenerationException totpCause = new CodeGenerationException("Błąd TOTP", new RuntimeException("root cause"));
 
-            CodeGenerationFailedException exception =
-                    new CodeGenerationFailedException("Niepowodzenie generowania TOTP", totpCause);
+            CodeGenerationFailedException exception = new CodeGenerationFailedException("Niepowodzenie generowania TOTP", totpCause);
 
             assertEquals("Niepowodzenie generowania TOTP", exception.getMessage());
             assertSame(totpCause, exception.getCause());
@@ -156,7 +148,7 @@ public class ExceptionsTest {
     @DisplayName("Test MfaExceptionHandler")
     class MfaExceptionHandlerTest {
     @Test
-    void shouldRedirectToTimeoutWhenSessionExpired() {
+    void shouldRedirectWhenSessionExpired() {
         RedirectAttributes attrs = new RedirectAttributesModelMap();
         MfaVerificationException ex = new MfaVerificationException("Sesja wygasła. Zaloguj się ponownie.");
 
@@ -167,7 +159,7 @@ public class ExceptionsTest {
     }
 
     @Test
-    void shouldRedirectToMfaErrorWhenMessageDoesNotContainTimeout() {
+    void shouldRedirectToMfaErrorWhenNoTimeout() {
         RedirectAttributes attrs = new RedirectAttributesModelMap();
         MfaVerificationException ex = new MfaVerificationException("Kod MFA jest nieprawidłowy.");
 

@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,18 +17,17 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-import pl.zapala.system_obslugi_klienta.controllers.WizytaController;
 import pl.zapala.system_obslugi_klienta.models.Klient;
 import pl.zapala.system_obslugi_klienta.models.KlientDto;
 import pl.zapala.system_obslugi_klienta.controllers.KlientController;
 import pl.zapala.system_obslugi_klienta.models.Pracownik;
-import pl.zapala.system_obslugi_klienta.models.Wizyta;
 import pl.zapala.system_obslugi_klienta.repositories.KlientRepository;
 import pl.zapala.system_obslugi_klienta.repositories.PracownikRepository;
-import pl.zapala.system_obslugi_klienta.repositories.WizytaRepository;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -48,11 +47,14 @@ public class KlientControllerTest {
 
     @Autowired
     private KlientController klientController;
-
     @Autowired
     private KlientRepository klientRepository;
-
     private KlientDto klientDto;
+    @Mock
+    private KlientRepository klientRepository1;
+
+    @InjectMocks
+    private KlientController klientController1;
 
     @BeforeEach
     void setUp() {
@@ -64,131 +66,95 @@ public class KlientControllerTest {
         klientDto.setEmail("anna@example.com");
         klientDto.setKodPocztowy("00-001");
         klientDto.setUlicaNumerDomu("ul. Kwiatowa 12");
+        klientDto.setMiejscowosc("Warszawa");
+        klientDto.setNumerTelefonu("+48 123 456 789");
     }
 
     @Nested
-    @DisplayName("Poprawne dodanie klienta")
+    @DisplayName("Testy KlientController")
     class KlientValidation {
 
         @DisplayName("Authentykacja - loggedPracownik")
         @Test
-        void loggedPracownik_shouldAddLoggedUserToModel_whenAuthenticated() {
+        void loggedPracownikTest() {
 
             Authentication authentication = mock(Authentication.class);
             when(authentication.isAuthenticated()).thenReturn(true);
             when(authentication.getName()).thenReturn("jan@example.com");
 
-
             SecurityContext securityContext = mock(SecurityContext.class);
             when(securityContext.getAuthentication()).thenReturn(authentication);
             SecurityContextHolder.setContext(securityContext);
 
-
             PracownikRepository pracownikRepo = mock(PracownikRepository.class);
             Pracownik expectedPracownik = new Pracownik();
             expectedPracownik.setEmail("jan@example.com");
+            expectedPracownik.setId(1);
+            expectedPracownik.getEmail();
+            expectedPracownik.getHaslo();
+            expectedPracownik.setHaslo("asd123!@#");
+            expectedPracownik.getTotpSecret();
+            expectedPracownik.setTotpSecret("123");
             when(pracownikRepo.findByEmail("jan@example.com")).thenReturn(expectedPracownik);
 
-
             Model model = mock(Model.class);
-
 
             KlientController controller = new KlientController(
                     mock(KlientRepository.class),
                     pracownikRepo);
 
-
             controller.loggedPracownik(model);
-
-
             verify(model).addAttribute("pracownik", expectedPracownik);
         }
 
         @Test
         @DisplayName("Pobranie klientow")
-        void shouldGetWizyty() {
+        void shouldGetKlienci() {
+            Klient klient = new Klient();
+            klientRepository.save(klient);
             ExtendedModelMap model = new ExtendedModelMap();
-            klientController.getKlienci(model);
+
+            String viewName = klientController.getKlienci(model);
+            assertEquals("klienci/index", viewName);
+            List<Klient> Klienci = klientRepository.findAll();
+            assertEquals(klient.getId(),Klienci.get(0).getId());
         }
 
         @Test
-        @DisplayName("Stworzenie klienta")
+        @DisplayName("Stworzenie klienta(model)")
         void CreateKlient() {
             ExtendedModelMap model = new ExtendedModelMap();
-            klientController.createKlient(model);
+            String viewName = klientController.createKlient(model);
+            assertEquals("klienci/dodaj", viewName);
         }
         @Test
-        @DisplayName("Powinien dodać klienta poprawnie")
-        void shouldAddClientSuccessfully() {
-
-            KlientDto klientDto1 = new KlientDto();
-            klientDto1.setImie("Anna");
-            klientDto1.setNazwisko("Kowalska");
-            klientDto1.setEmail("anna@example.com");
-            klientDto1.setDataUrodzenia(Date.valueOf("1995-05-10"));
-            klientDto1.setKodPocztowy("00-001");
-            klientDto1.setUlicaNumerDomu("ul. Kwiatowa 12");
-            klientDto1.setMiejscowosc("Warszawa");
-            klientDto1.setNumerTelefonu("123456789");
-
-            BindingResult result = new BeanPropertyBindingResult(klientDto1, "klientDto1");
-
-            String viewName = klientController.createKlient(klientDto1, result);
+        @DisplayName("Stworzenie klienta - poprawnie")
+        void shouldCreateClientSuccessfully() {
+            BindingResult result = new BeanPropertyBindingResult(klientDto, "klientDto1");
+            String viewName = klientController.createKlient(klientDto, result);
 
             assertEquals("redirect:/klienci", viewName);
             assertEquals("Anna", klientRepository.findAll().get(0).getImie());
         }
 
         @Test
-        @DisplayName("CreateKlientSameMail")
+        @DisplayName("Stworzenie klienta - ten sam mail błąd")
         void CreateKlientSameMail() {
             Klient klient = new Klient();
-            klient.setEmail("kacper.wojtyra1@gmail.com");
+            klient.setEmail("anna@example.com");
             klientRepository.save(klient);
+            klientDto.setEmail(klient.getEmail());
 
-            KlientDto klientDto1 = new KlientDto();
-            klientDto1.setImie("Anna");
-            klientDto1.setNazwisko("Kowalska");
-            klientDto1.setEmail(klient.getEmail());
-            klientDto1.setDataUrodzenia(Date.valueOf("1995-05-10"));
-            klientDto1.setKodPocztowy("00-001");
-            klientDto1.setUlicaNumerDomu("ul. Kwiatowa 12");
-            klientDto1.setMiejscowosc("Warszawa");
-            klientDto1.setNumerTelefonu("123456789");
-
-            BindingResult result = new BeanPropertyBindingResult(klientDto1, "klientDto1");
-
-            klientController.createKlient(klientDto1, result);
+            BindingResult result = new BeanPropertyBindingResult(klientDto, "klientDto");
+            String viewName = klientController.createKlient(klientDto, result);
+            assertTrue(result.hasErrors());
+            assertEquals(result.getFieldError("email").getDefaultMessage(),
+                    "Klient o takim adresie e-mail już istnieje.");
+            assertEquals("klienci/dodaj", viewName);
         }
 
         @Test
-        @DisplayName("CreateKlientHasErrors")
-        void CreateKlientHasErrors() {
-            KlientDto klientDto1 = new KlientDto();
-            klientDto1.setImie("Anna");
-            klientDto1.setNazwisko("Kowalska");
-            klientDto1.setEmail("anna12@example.com");
-            klientDto1.setDataUrodzenia(Date.valueOf("1995-05-10"));
-            klientDto1.setKodPocztowy("00-001");
-            klientDto1.setUlicaNumerDomu("ul. Kwiatowa 12");
-            klientDto1.setMiejscowosc("Warszawa");
-            klientDto1.setNumerTelefonu("123456789");
-
-            BindingResult result = mock(BindingResult.class);
-            when(result.hasErrors()).thenReturn(true);
-
-            klientController.createKlient(klientDto1, result);
-        }
-
-
-        @Test
-        @DisplayName("Powinien edytowac klienta null")
-        void EditKlient1Null() {
-            ExtendedModelMap model = new ExtendedModelMap();
-            klientController.editKlient(model,1);
-        }
-        @Test
-        @DisplayName("Powinien edytowac klienta poprawnie")
+        @DisplayName("Edytowanie klienta(model) - poprawnie")
         void EditKlient1() {
             Klient klient = new Klient();
             klient.setImie("Jan");
@@ -200,30 +166,50 @@ public class KlientControllerTest {
             klient.setMiejscowosc("Warszawa");
             klient.setNumerTelefonu("123456789");
             klientRepository.save(klient);
-
             ExtendedModelMap model = new ExtendedModelMap();
-            klientController.editKlient(model, klient.getId());
+            String viewName = klientController.editKlient(model, klient.getId());
+            assertEquals("klienci/edytuj", viewName);
         }
 
         @Test
-        @DisplayName("Powinien edytowac klienta2 null")
+        @DisplayName("Edytowanie klienta(model) - brak klienta")
+        void EditKlient1Null() {
+            ExtendedModelMap model = new ExtendedModelMap();
+            klientController.editKlient(model,1);
+
+            String viewName = klientController.editKlient(model,1);
+            assertEquals("redirect:/klienci", viewName);
+        }
+
+        @Test
+        @DisplayName("Edytowanie klienta - poprawnie")
+        void EditKlient2Success() {
+            Klient klient = new Klient();
+            klient.setImie("Marek");
+            klientRepository.save(klient);
+
+            ExtendedModelMap model = new ExtendedModelMap();
+            BindingResult result = new BeanPropertyBindingResult(klientDto, "klientDto");
+            String viewName = klientController.editKlient(model,klient.getId(),klientDto,result);
+            assertEquals("redirect:/klienci", viewName);
+
+            List<Klient> Klienci = klientRepository.findAll();
+            assertNotEquals("Marek",Klienci.get(0).getImie());
+            assertEquals("Anna",Klienci.get(0).getImie());
+        }
+
+
+        @Test
+        @DisplayName("Edytowanie klienta - brak klienta")
         void EditKlient2Null() {
             ExtendedModelMap model = new ExtendedModelMap();
             BindingResult result = mock(BindingResult.class);
-            klientController.editKlient(model,123,klientDto,result);
+            String viewName = klientController.editKlient(model,123,klientDto,result);
+            assertEquals("redirect:/klienci", viewName);
         }
-        /*
-                @Test
-                @DisplayName("Powinien edytowac klienta2 null")
-                void EditKlient2Ex() {
-                    ExtendedModelMap model = new ExtendedModelMap();
-                    BindingResult result = new BeanPropertyBindingResult(klientDto, "klientDto");
-                    when(result.hasErrors()).thenReturn(true);
-                    klientController.editKlient(model,123,klientDto,result);
-                }
-         */
+
         @Test
-        @DisplayName("Powinien edytowac klienta2 errpp")
+        @DisplayName("Edytowanie klienta - result błąd")
         void EditKlient2HasErrors() {
             Klient klient = new Klient();
             klientRepository.save(klient);
@@ -232,55 +218,36 @@ public class KlientControllerTest {
             BindingResult result = mock(BindingResult.class);
             when(result.hasErrors()).thenReturn(true);
             klientController.editKlient(model,klient.getId(),klientDto,result);
+            String viewName = klientController.editKlient(model,klient.getId(),klientDto,result);
+            assertEquals("klienci/edytuj", viewName);
         }
+
+
         @Test
-        @DisplayName("Powinien edytowac klienta2 poprawnie")
-        void EditKlient2Success() {
+        @DisplayName("Edytowanie klienta - ten sam mail błąd")
+        void EditKlient2SameMail() {
+            int klientId = 1;
             Klient klient = new Klient();
-            klientRepository.save(klient);
+            klient.setId(klientId);
+            klient.setEmail("anna@example.com");
 
-            KlientDto klientDto = new KlientDto();
-            klientDto.setImie("Anna");
-            klientDto.setNazwisko("Kowalska");
-            klientDto.setEmail("anna12@example.com");
-            klientDto.setDataUrodzenia(Date.valueOf("1995-05-10"));
-            klientDto.setKodPocztowy("00-001");
-            klientDto.setUlicaNumerDomu("ul. Kwiatowa 12");
-            klientDto.setMiejscowosc("Warszawa");
-            klientDto.setNumerTelefonu("123456789");
+            when(klientRepository1.findById(klientId)).thenReturn(Optional.of(klient));
+            doThrow(new RuntimeException("Duplicate email")).when(klientRepository1).save(any(Klient.class));
 
-            ExtendedModelMap model = new ExtendedModelMap();
             BindingResult result = new BeanPropertyBindingResult(klientDto, "klientDto");
-            klientController.editKlient(model,klient.getId(),klientDto,result);
+            Model model = new ExtendedModelMap();
+            String viewName = klientController1.editKlient(model, klientId, klientDto, result);
+
+            assertTrue(result.hasErrors());
+            assertEquals("Klient o takim adresie e-mail już istnieje.", result.getFieldError("email").getDefaultMessage());
+            assertEquals("klienci/edytuj", viewName);
         }
 
-        @Test
-        @DisplayName("Powinien edytowac klienta2 poprawnie")
-        void EditKlient2SuccessSameMail() {
-            Klient klient = new Klient();
-            klient.setEmail("kacper.wojtyra1@gmail.com");
-            klientRepository.save(klient);
-            Klient klient1 = new Klient();
-            klient1.setEmail("kacper.wojtyra1@gmail.com");
-            klientRepository.save(klient1);
 
-            KlientDto klientDto = new KlientDto();
-            klientDto.setImie("Anna");
-            klientDto.setNazwisko("Kowalska");
-            klientDto.setEmail(klient.getEmail());
-            klientDto.setDataUrodzenia(Date.valueOf("1995-05-10"));
-            klientDto.setKodPocztowy("00-001");
-            klientDto.setUlicaNumerDomu("ul. Kwiatowa 12");
-            klientDto.setMiejscowosc("Warszawa");
-            klientDto.setNumerTelefonu("123456789");
 
-            ExtendedModelMap model = new ExtendedModelMap();
-            BindingResult result = new BeanPropertyBindingResult(klientDto, "klientDto");
-            klientController.editKlient(model,klient.getId(),klientDto,result);
-        }
         @Test
-        @DisplayName("Powinien usunąć klienta")
-        void shouldDeleteClientSuccessfully() {
+        @DisplayName("Usuwanie klienta - poprawnie")
+        void DeleteKlientSuccess() {
             Klient klient = new Klient();
             klient.setImie("Jan");
             klient.setNazwisko("Nowak");
@@ -296,6 +263,13 @@ public class KlientControllerTest {
 
             assertEquals("redirect:/klienci", viewName);
             assertFalse(klientRepository.findById(klient.getId()).isPresent());
+        }
+
+        @Test
+        @DisplayName("Usuwanie klienta - brak klienta")
+        void DeleteKlientNull() {
+            String viewName = klientController.deleteKlient(1);
+            assertEquals("redirect:/klienci", viewName);
         }
 
 

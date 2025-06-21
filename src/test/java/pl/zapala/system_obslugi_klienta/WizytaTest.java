@@ -38,7 +38,7 @@ public class WizytaTest {
     }
 
     @Nested
-    @DisplayName("Test pokoj")
+    @DisplayName("Test pokoju")
     class NameValidation {
 
         @ParameterizedTest

@@ -36,8 +36,6 @@ public class AntivirusServiceTest {
     @BeforeEach
     void setUp() {
         antivirusService = new AntivirusService();
-
-        // Ustawienie pól prywatnych
         ReflectionTestUtils.setField(antivirusService, "enabled", true);
         ReflectionTestUtils.setField(antivirusService, "host", "localhost");
         ReflectionTestUtils.setField(antivirusService, "port", 3310);
@@ -47,7 +45,6 @@ public class AntivirusServiceTest {
     @DisplayName("Nie skanuje gdy AV wyłączone")
     void shouldSkipScanWhenDisabled() {
         ReflectionTestUtils.setField(antivirusService, "enabled", false);
-
         assertDoesNotThrow(() -> antivirusService.scan("test".getBytes()));
     }
 
@@ -56,14 +53,12 @@ public class AntivirusServiceTest {
     void shouldThrowStorageExceptionWhenNoResponse() {
         byte[] input = "test".getBytes();
         AntivirusService av = new AntivirusService() {
-
             protected void doScan(InputStream payload) {
                 throw new StorageException("Brak odpowiedzi od ClamAV");
             }
         };
 
         ReflectionTestUtils.setField(av, "enabled", true);
-
         StorageException ex = assertThrows(StorageException.class, () -> av.scan(input));
         assertEquals("Błąd połączenia z ClamAV (null:0)", ex.getMessage());
     }
