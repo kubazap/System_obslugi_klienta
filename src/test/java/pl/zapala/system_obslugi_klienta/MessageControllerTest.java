@@ -103,6 +103,7 @@ class MessageControllerTest {
             assertEquals(messages.get(0).getContent(),"Hello");
             assertEquals(messages.get(0).getReceiverLastName(),"Nowak");
             assertEquals(messages.get(0).getReceiverFirstName(),"Janek");
+            assertEquals(messages.get(0).getSenderLastName(),messageDto.getSenderLastName());
             String timestamp = messages.get(0).getTimestamp().substring(0, 10);  // np. "2025-06-21T13:34:48.739711Z"
             String time1 = Instant.now().toString().substring(0, 10);
             assertEquals(timestamp, time1);
@@ -124,9 +125,8 @@ class MessageControllerTest {
         @Test
         @DisplayName("Lista wiadomości z każdym pracownikiem")
         void ShouldList2() {
-
             messageController.sendMessage(messageDto);
-            messageController.getConversations(pracownik.getId());
+            messageController.sendMessage(messageDto2);
             ResponseEntity<List<Map<String, Object>>> response = messageController.getConversations(pracownik.getId());
             List<Map<String, Object>> conversations = response.getBody();
             assertNotNull(response);
